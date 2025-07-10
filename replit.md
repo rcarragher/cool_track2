@@ -4,6 +4,15 @@
 
 This is a full-stack inventory management system built with React, Express, and PostgreSQL. The application helps users track inventory items across different devices (refrigerators and freezers), managing expiration dates, categories, and quantities. It features a modern UI built with shadcn/ui components and provides real-time inventory tracking with dashboard analytics.
 
+## Recent Changes (January 2025)
+
+✓ **Simplified Navigation**: Removed device selector from header for cleaner interface
+✓ **Enhanced Dashboard Cards**: All cards now functional with proper navigation to filtered views
+✓ **Full List View**: Added paginated list view (25, 50, 100 items per page) accessible from dashboard cards
+✓ **Fixed Device Preselection**: Add item modal now automatically selects first available device
+✓ **Improved Form Controls**: Select components properly display selected values
+✓ **Streamlined Schema**: Removed redundant location field, items organized by device only
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
