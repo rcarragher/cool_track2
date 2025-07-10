@@ -42,12 +42,12 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
     },
   });
 
-  // Set default device when devices are loaded
+  // Set default device when devices are loaded or modal opens
   useEffect(() => {
-    if (devices.length > 0 && form.getValues('deviceId') === 0) {
+    if (devices.length > 0 && isOpen) {
       form.setValue('deviceId', devices[0].id);
     }
-  }, [devices, form]);
+  }, [devices, isOpen, form]);
 
   const createItemMutation = useMutation({
     mutationFn: async (data: InsertInventoryItem) => {

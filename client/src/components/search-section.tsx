@@ -22,21 +22,23 @@ export default function SearchSection({
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-slate-900">Search Inventory</h3>
-            <div className="flex items-center space-x-2 text-sm text-slate-600">
-              <span>Show top</span>
-              <Select value={displayLimit.toString()} onValueChange={(value) => onDisplayLimitChange(parseInt(value))}>
-                <SelectTrigger className="w-20">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="-1">All</SelectItem>
-                </SelectContent>
-              </Select>
-              <span>items</span>
-            </div>
+            {displayLimit !== -1 && (
+              <div className="flex items-center space-x-2 text-sm text-slate-600">
+                <span>Show top</span>
+                <Select value={displayLimit.toString()} onValueChange={(value) => onDisplayLimitChange(parseInt(value))}>
+                  <SelectTrigger className="w-20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="-1">All</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span>items</span>
+              </div>
+            )}
           </div>
           
           <div className="relative">

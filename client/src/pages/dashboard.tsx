@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Snowflake, Settings } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Snowflake, Settings, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DashboardCard from "@/components/dashboard-card";
 import SearchSection from "@/components/search-section";
@@ -11,12 +10,14 @@ import SettingsModal from "@/components/settings-modal";
 import type { Device, InventoryItem } from "@shared/schema";
 
 export default function Dashboard() {
-  const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [displayLimit, setDisplayLimit] = useState(10);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'expiring' | 'expired'>('all');
+  const [showFullList, setShowFullList] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
 
   const { data: devices = [], isLoading: devicesLoading } = useQuery<Device[]>({
     queryKey: ['/api/devices'],
@@ -30,10 +31,7 @@ export default function Dashboard() {
     queryKey: ['/api/settings'],
   });
 
-  // Set default device if not selected
-  if (!selectedDeviceId && devices.length > 0) {
-    setSelectedDeviceId(devices[0].id);
-  }
+
 
   // Calculate dashboard stats
   const dashboardStats = useMemo(() => {
@@ -57,14 +55,9 @@ export default function Dashboard() {
     return { totalItems, expiringSoon, expired };
   }, [inventoryItems]);
 
-  // Filter items based on search, device, and filter type
+  // Filter items based on search and filter type
   const filteredItems = useMemo(() => {
     let filtered = inventoryItems;
-
-    // Filter by device if selected
-    if (selectedDeviceId) {
-      filtered = filtered.filter(item => item.deviceId === selectedDeviceId);
-    }
 
     // Filter by search query
     if (searchQuery) {
@@ -94,22 +87,32 @@ export default function Dashboard() {
     }
 
     return filtered;
-  }, [inventoryItems, selectedDeviceId, searchQuery, filterType]);
+  }, [inventoryItems, searchQuery, filterType]);
 
   const displayedItems = displayLimit === -1 ? filteredItems : filteredItems.slice(0, displayLimit);
 
-  const currentDevice = devices.find(d => d.id === selectedDeviceId);
+  // Pagination for full list view
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const paginatedItems = showFullList 
+    ? filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    : displayedItems;
 
   const handleCardClick = (type: 'total' | 'expiring' | 'expired' | 'add') => {
     switch (type) {
       case 'total':
         setFilterType('all');
+        setShowFullList(true);
+        setCurrentPage(1);
         break;
       case 'expiring':
         setFilterType('expiring');
+        setShowFullList(true);
+        setCurrentPage(1);
         break;
       case 'expired':
         setFilterType('expired');
+        setShowFullList(true);
+        setCurrentPage(1);
         break;
       case 'add':
         setShowAddModal(true);
@@ -141,18 +144,17 @@ export default function Dashboard() {
               <h1 className="text-xl font-bold text-slate-900">CoolKeeper</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Select value={selectedDeviceId?.toString()} onValueChange={(value) => setSelectedDeviceId(parseInt(value))}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Select device" />
-                </SelectTrigger>
-                <SelectContent>
-                  {devices.map(device => (
-                    <SelectItem key={device.id} value={device.id.toString()}>
-                      {device.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {showFullList && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowFullList(false)}
+                  className="flex items-center"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -166,63 +168,145 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Dashboard Section */}
-        <section className="mb-8">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Dashboard</h2>
-            <p className="text-slate-600">Overview of your inventory status</p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <DashboardCard
-              title="Total Items"
-              value={dashboardStats.totalItems}
-              icon="box"
-              color="blue"
-              onClick={() => handleCardClick('total')}
-            />
-            <DashboardCard
-              title="Expiring Soon"
-              value={dashboardStats.expiringSoon}
-              icon="clock"
-              color="warning"
-              subtitle="Next 3 days"
-              onClick={() => handleCardClick('expiring')}
-            />
-            <DashboardCard
-              title="Expired Items"
-              value={dashboardStats.expired}
-              icon="warning"
-              color="expired"
-              subtitle="Needs attention"
-              onClick={() => handleCardClick('expired')}
-            />
-            <DashboardCard
-              title="Add Items"
-              value="+"
-              icon="plus"
-              color="gradient"
-              subtitle="Add new inventory"
-              onClick={() => handleCardClick('add')}
-            />
-          </div>
-        </section>
+        {showFullList ? (
+          <>
+            {/* Full List View */}
+            <section className="mb-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                  {filterType === 'all' ? 'All Items' : 
+                   filterType === 'expiring' ? 'Expiring Soon' : 'Expired Items'}
+                </h2>
+                <p className="text-slate-600">
+                  {filterType === 'all' ? 'Complete inventory listing' : 
+                   filterType === 'expiring' ? 'Items expiring in the next 3 days' : 
+                   'Items that have passed their expiration date'}
+                </p>
+              </div>
 
-        {/* Search Section */}
-        <SearchSection
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          displayLimit={displayLimit}
-          onDisplayLimitChange={setDisplayLimit}
-        />
+              {/* Pagination Controls */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-slate-600">
+                    Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredItems.length)} of {filteredItems.length} items
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-slate-600">Items per page:</span>
+                    <select 
+                      value={itemsPerPage} 
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="border border-slate-300 rounded px-2 py-1 text-sm"
+                    >
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="px-3 py-1 text-sm">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
 
-        {/* Inventory Table */}
-        <InventoryTable
-          items={displayedItems}
-          totalItems={filteredItems.length}
-          displayLimit={displayLimit}
-          devices={devices}
-        />
+              {/* Search Section */}
+              <SearchSection
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                displayLimit={-1}
+                onDisplayLimitChange={setDisplayLimit}
+              />
+
+              {/* Inventory Table */}
+              <InventoryTable
+                items={paginatedItems}
+                totalItems={filteredItems.length}
+                displayLimit={-1}
+                devices={devices}
+              />
+            </section>
+          </>
+        ) : (
+          <>
+            {/* Dashboard Section */}
+            <section className="mb-8">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">Dashboard</h2>
+                <p className="text-slate-600">Overview of your inventory status</p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <DashboardCard
+                  title="Total Items"
+                  value={dashboardStats.totalItems}
+                  icon="box"
+                  color="blue"
+                  onClick={() => handleCardClick('total')}
+                />
+                <DashboardCard
+                  title="Expiring Soon"
+                  value={dashboardStats.expiringSoon}
+                  icon="clock"
+                  color="warning"
+                  subtitle="Next 3 days"
+                  onClick={() => handleCardClick('expiring')}
+                />
+                <DashboardCard
+                  title="Expired Items"
+                  value={dashboardStats.expired}
+                  icon="warning"
+                  color="expired"
+                  subtitle="Needs attention"
+                  onClick={() => handleCardClick('expired')}
+                />
+                <DashboardCard
+                  title="Add Items"
+                  value="+"
+                  icon="plus"
+                  color="gradient"
+                  subtitle="Add new inventory"
+                  onClick={() => handleCardClick('add')}
+                />
+              </div>
+            </section>
+
+            {/* Search Section */}
+            <SearchSection
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              displayLimit={displayLimit}
+              onDisplayLimitChange={setDisplayLimit}
+            />
+
+            {/* Inventory Table */}
+            <InventoryTable
+              items={displayedItems}
+              totalItems={filteredItems.length}
+              displayLimit={displayLimit}
+              devices={devices}
+            />
+          </>
+        )}
       </main>
 
       {/* Modals */}
