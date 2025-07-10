@@ -108,7 +108,10 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
           
           <div className="space-y-2">
             <Label htmlFor="category">Category *</Label>
-            <Select onValueChange={(value) => form.setValue("category", value)}>
+            <Select 
+              value={form.watch("category") || ""} 
+              onValueChange={(value) => form.setValue("category", value)}
+            >
               <SelectTrigger className={form.formState.errors.category ? "border-red-500" : ""}>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
@@ -139,7 +142,10 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
           
           <div className="space-y-2">
             <Label htmlFor="deviceId">Device *</Label>
-            <Select onValueChange={(value) => form.setValue("deviceId", parseInt(value))}>
+            <Select 
+              value={form.watch("deviceId")?.toString() || ""} 
+              onValueChange={(value) => form.setValue("deviceId", parseInt(value))}
+            >
               <SelectTrigger className={form.formState.errors.deviceId ? "border-red-500" : ""}>
                 <SelectValue placeholder="Select device" />
               </SelectTrigger>
