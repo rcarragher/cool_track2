@@ -14,7 +14,6 @@ export const inventoryItems = pgTable("inventory_items", {
   category: text("category").notNull(), // 'meat', 'cocktail', 'fruit-veg', 'prepared'
   quantity: text("quantity").notNull(),
   deviceId: integer("device_id").notNull(),
-  location: text("location").notNull(), // 'refrigerator' or 'freezer'
   dateAdded: text("date_added").notNull(),
   expirationDate: text("expiration_date"),
 });

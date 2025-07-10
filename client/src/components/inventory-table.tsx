@@ -87,8 +87,9 @@ export default function InventoryTable({
     return device ? device.name : 'Unknown Device';
   };
 
-  const getLocationColor = (location: string) => {
-    return location.toLowerCase() === 'refrigerator' ? 'bg-blue-500' : 'bg-purple-500';
+  const getDeviceTypeColor = (deviceId: number) => {
+    const device = devices.find(d => d.id === deviceId);
+    return device?.type === 'refrigerator' ? 'bg-blue-500' : 'bg-purple-500';
   };
 
   return (
@@ -130,7 +131,7 @@ export default function InventoryTable({
                       <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Quantity</th>
                       <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Added</th>
                       <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Expires</th>
-                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Location</th>
+                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Device</th>
                       <th className="text-right py-3 px-6 text-sm font-medium text-slate-600">Actions</th>
                     </tr>
                   </thead>
@@ -142,7 +143,7 @@ export default function InventoryTable({
                         <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-4 px-6">
                             <div className="flex items-center space-x-3">
-                              <div className={`w-2 h-2 rounded-full ${getLocationColor(item.location)}`}></div>
+                              <div className={`w-2 h-2 rounded-full ${getDeviceTypeColor(item.deviceId)}`}></div>
                               <span className="font-medium text-slate-900">{item.name}</span>
                             </div>
                           </td>

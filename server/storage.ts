@@ -113,7 +113,11 @@ export class MemStorage implements IStorage {
 
   async createInventoryItem(insertItem: InsertInventoryItem): Promise<InventoryItem> {
     const id = this.currentInventoryId++;
-    const item: InventoryItem = { ...insertItem, id };
+    const item: InventoryItem = { 
+      ...insertItem, 
+      id,
+      expirationDate: insertItem.expirationDate || null
+    };
     this.inventoryItems.set(id, item);
     return item;
   }
@@ -122,7 +126,11 @@ export class MemStorage implements IStorage {
     const existingItem = this.inventoryItems.get(id);
     if (!existingItem) return undefined;
 
-    const updatedItem: InventoryItem = { ...existingItem, ...itemUpdate };
+    const updatedItem: InventoryItem = { 
+      ...existingItem, 
+      ...itemUpdate,
+      expirationDate: itemUpdate.expirationDate !== undefined ? itemUpdate.expirationDate : existingItem.expirationDate
+    };
     this.inventoryItems.set(id, updatedItem);
     return updatedItem;
   }

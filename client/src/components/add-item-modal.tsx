@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,11 +37,17 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
       category: "",
       quantity: "",
       deviceId: 0,
-      location: "",
       dateAdded: new Date().toISOString().split('T')[0],
       expirationDate: "",
     },
   });
+
+  // Set default device when devices are loaded
+  useEffect(() => {
+    if (devices.length > 0 && form.getValues('deviceId') === 0) {
+      form.setValue('deviceId', devices[0].id);
+    }
+  }, [devices, form]);
 
   const createItemMutation = useMutation({
     mutationFn: async (data: InsertInventoryItem) => {
@@ -150,21 +156,7 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
             )}
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="location">Location *</Label>
-            <Select onValueChange={(value) => form.setValue("location", value)}>
-              <SelectTrigger className={form.formState.errors.location ? "border-red-500" : ""}>
-                <SelectValue placeholder="Select location" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="refrigerator">Refrigerator</SelectItem>
-                <SelectItem value="freezer">Freezer</SelectItem>
-              </SelectContent>
-            </Select>
-            {form.formState.errors.location && (
-              <p className="text-sm text-red-600">{form.formState.errors.location.message}</p>
-            )}
-          </div>
+
           
           <div className="space-y-2">
             <Label htmlFor="dateAdded">Date Added</Label>
