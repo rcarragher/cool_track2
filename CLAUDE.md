@@ -14,6 +14,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Database
 - `npm run db:push` - Push database schema changes using Drizzle Kit
+- `npm run db:seed` - Populate database with realistic sample data (~50 items)
+- `npm run db:reset` - Clear database and reload with fresh sample data
+- `npm run db:fresh` - Reset database and start development server
 - Requires `DATABASE_URL` environment variable for PostgreSQL connection
 
 ### Environment Setup
@@ -85,3 +88,14 @@ RESTful API with `/api` prefix:
 - Database migrations handled by Drizzle Kit
 
 This is an inventory management system for tracking items across refrigerators and freezers with expiration date monitoring and dashboard analytics.
+
+## Sample Data
+
+The application includes realistic sample data for development:
+- **~50 inventory items** across meat, fruits/vegetables, prepared meals, and cocktail categories
+- **Smart device distribution** - frozen items in freezer, fresh items in refrigerator
+- **Realistic expiration dates** - some items expire in 1-3 days, others in months/years
+- **Date-aware generation** - calculates expiration dates from current date
+- **Easy reset** - `npm run db:reset` clears and reloads fresh sample data
+
+Sample data includes items like ground beef, chicken breasts, frozen vegetables, leftover meals, craft beer, and more with appropriate quantities and expiration windows.

@@ -4,13 +4,16 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development tsx --watch server/index.ts",
-    "dev:server": "NODE_ENV=development tsx --watch server/index.ts",
+    "dev": "NODE_ENV=development tsx --watch --env-file=.env server/index.ts",
+    "dev:server": "NODE_ENV=development tsx --watch --env-file=.env server/index.ts",
     "dev:client": "vite --host localhost --port 3001",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx --env-file=.env scripts/seed-db.ts",
+    "db:reset": "npm run db:push && npm run db:seed",
+    "db:fresh": "npm run db:reset && npm run dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -61,6 +64,7 @@
     "next-themes": "^0.4.6",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "postgres": "^3.4.7",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",

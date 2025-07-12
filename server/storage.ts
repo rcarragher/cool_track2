@@ -11,6 +11,7 @@ import {
   type UpdateInventoryItem,
   type UpdateDevice
 } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Device methods
@@ -159,4 +160,228 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DbStorage implements IStorage {
+  private db: any;
+
+  constructor() {
+    // Import and initialize database connection
+    this.initializeDb();
+  }
+
+  private async initializeDb() {
+    if (!process.env.DATABASE_URL) {
+      console.warn("⚠️  DATABASE_URL not found, falling back to memory storage");
+      return;
+    }
+
+    try {
+      const { drizzle } = await import("drizzle-orm/postgres-js");
+      const postgres = (await import("postgres")).default;
+      
+      const sql = postgres(process.env.DATABASE_URL);
+      this.db = drizzle(sql);
+      console.log("✅ Connected to PostgreSQL database");
+    } catch (error) {
+      console.error("❌ Failed to connect to database:", error);
+      console.warn("⚠️  Falling back to memory storage");
+    }
+  }
+
+  // Device methods
+  async getDevices(): Promise<Device[]> {
+    if (!this.db) {
+      console.warn("Database not available, returning empty array");
+      return [];
+    }
+    
+    try {
+      return await this.db.select().from(devices);
+    } catch (error) {
+      console.error("Error fetching devices:", error);
+      return [];
+    }
+  }
+
+  async getDevice(id: number): Promise<Device | undefined> {
+    if (!this.db) return undefined;
+    
+    try {
+      const result = await this.db.select().from(devices).where(eq(devices.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Error fetching device:", error);
+      return undefined;
+    }
+  }
+
+  async createDevice(insertDevice: InsertDevice): Promise<Device> {
+    if (!this.db) throw new Error("Database not available");
+    
+    try {
+      const result = await this.db.insert(devices).values(insertDevice).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating device:", error);
+      throw error;
+    }
+  }
+
+  async updateDevice(id: number, deviceUpdate: Partial<InsertDevice>): Promise<Device | undefined> {
+    if (!this.db) return undefined;
+    
+    try {
+      const result = await this.db
+        .update(devices)
+        .set(deviceUpdate)
+        .where(eq(devices.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error updating device:", error);
+      return undefined;
+    }
+  }
+
+  async deleteDevice(id: number): Promise<boolean> {
+    if (!this.db) return false;
+    
+    try {
+      const result = await this.db.delete(devices).where(eq(devices.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Error deleting device:", error);
+      return false;
+    }
+  }
+
+  // Inventory methods
+  async getInventoryItems(): Promise<InventoryItem[]> {
+    if (!this.db) {
+      console.warn("Database not available, returning empty array");
+      return [];
+    }
+    
+    try {
+      return await this.db.select().from(inventoryItems);
+    } catch (error) {
+      console.error("Error fetching inventory items:", error);
+      return [];
+    }
+  }
+
+  async getInventoryItem(id: number): Promise<InventoryItem | undefined> {
+    if (!this.db) return undefined;
+    
+    try {
+      const result = await this.db.select().from(inventoryItems).where(eq(inventoryItems.id, id));
+      return result[0];
+    } catch (error) {
+      console.error("Error fetching inventory item:", error);
+      return undefined;
+    }
+  }
+
+  async createInventoryItem(insertItem: InsertInventoryItem): Promise<InventoryItem> {
+    if (!this.db) throw new Error("Database not available");
+    
+    try {
+      const result = await this.db.insert(inventoryItems).values(insertItem).returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error creating inventory item:", error);
+      throw error;
+    }
+  }
+
+  async updateInventoryItem(id: number, itemUpdate: Partial<InsertInventoryItem>): Promise<InventoryItem | undefined> {
+    if (!this.db) return undefined;
+    
+    try {
+      const result = await this.db
+        .update(inventoryItems)
+        .set(itemUpdate)
+        .where(eq(inventoryItems.id, id))
+        .returning();
+      return result[0];
+    } catch (error) {
+      console.error("Error updating inventory item:", error);
+      return undefined;
+    }
+  }
+
+  async deleteInventoryItem(id: number): Promise<boolean> {
+    if (!this.db) return false;
+    
+    try {
+      const result = await this.db.delete(inventoryItems).where(eq(inventoryItems.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      console.error("Error deleting inventory item:", error);
+      return false;
+    }
+  }
+
+  // Settings methods
+  async getSettings(): Promise<Settings[]> {
+    if (!this.db) {
+      console.warn("Database not available, returning empty array");
+      return [];
+    }
+    
+    try {
+      return await this.db.select().from(settings);
+    } catch (error) {
+      console.error("Error fetching settings:", error);
+      return [];
+    }
+  }
+
+  async getSetting(key: string): Promise<Settings | undefined> {
+    if (!this.db) return undefined;
+    
+    try {
+      const result = await this.db.select().from(settings).where(eq(settings.key, key));
+      return result[0];
+    } catch (error) {
+      console.error("Error fetching setting:", error);
+      return undefined;
+    }
+  }
+
+  async setSetting(insertSetting: InsertSettings): Promise<Settings> {
+    if (!this.db) throw new Error("Database not available");
+    
+    try {
+      // Try to update first
+      const existing = await this.getSetting(insertSetting.key);
+      
+      if (existing) {
+        const result = await this.db
+          .update(settings)
+          .set({ value: insertSetting.value })
+          .where(eq(settings.key, insertSetting.key))
+          .returning();
+        return result[0];
+      } else {
+        const result = await this.db.insert(settings).values(insertSetting).returning();
+        return result[0];
+      }
+    } catch (error) {
+      console.error("Error setting configuration:", error);
+      throw error;
+    }
+  }
+}
+
+// Auto-detect which storage to use based on environment
+function createStorage(): IStorage {
+  if (process.env.DATABASE_URL) {
+    console.log("🗃️  Using database storage (PostgreSQL)");
+    return new DbStorage();
+  } else {
+    console.log("💾 Using memory storage (development fallback)");
+    return new MemStorage();
+  }
+}
+
+export const storage = createStorage();
