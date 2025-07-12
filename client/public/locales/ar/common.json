@@ -52,5 +52,9 @@
   "deviceTypes": {
     "refrigerator": "ثلاجة",
     "freezer": "فريزر"
+  },
+  "menu": {
+    "language": "اللغة",
+    "settings": "الإعدادات"
   }
 }

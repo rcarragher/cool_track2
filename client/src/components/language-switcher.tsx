@@ -3,9 +3,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useEffect } from 'react';
 
 const languages = [
-  { code: 'en', name: 'English', dir: 'ltr' },
-  { code: 'es', name: 'Español', dir: 'ltr' },
-  { code: 'ar', name: 'العربية', dir: 'rtl' },
+  { code: 'en', name: 'English', dir: 'ltr', flag: '🇺🇸' },
+  { code: 'es', name: 'Español', dir: 'ltr', flag: '🇪🇸' },
+  { code: 'ar', name: 'العربية', dir: 'rtl', flag: '🇸🇦' },
 ] as const;
 
 export function LanguageSwitcher() {
@@ -43,15 +43,21 @@ export function LanguageSwitcher() {
 
   return (
     <Select value={i18n.language} onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-32">
-        <SelectValue placeholder={currentLanguage.name} />
+      <SelectTrigger className="w-40">
+        <SelectValue>
+          <div className="flex items-center space-x-2">
+            <span className="text-lg">{currentLanguage.flag}</span>
+            <span className="text-sm font-medium">{currentLanguage.code.toUpperCase()}</span>
+          </div>
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {languages.map((language) => (
           <SelectItem key={language.code} value={language.code}>
-            <span className={language.dir === 'rtl' ? 'font-arabic' : ''}>
-              {language.name}
-            </span>
+            <div className="flex items-center space-x-2">
+              <span className="text-lg">{language.flag}</span>
+              <span className="text-sm font-medium">{language.code.toUpperCase()}</span>
+            </div>
           </SelectItem>
         ))}
       </SelectContent>

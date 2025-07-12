@@ -1,14 +1,13 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Snowflake, Settings, ArrowLeft } from "lucide-react";
+import { Snowflake, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DashboardCard from "@/components/dashboard-card";
-import SearchSection from "@/components/search-section";
 import InventoryTable from "@/components/inventory-table";
 import AddItemModal from "@/components/add-item-modal";
 import SettingsModal from "@/components/settings-modal";
-import { LanguageSwitcher } from "@/components/language-switcher";
+import { HeaderMenu } from "@/components/header-menu";
 import type { Device, InventoryItem } from "@shared/schema";
 
 export default function Dashboard() {
@@ -21,6 +20,7 @@ export default function Dashboard() {
   const [showFullList, setShowFullList] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [selectedDevice, setSelectedDevice] = useState<number | null>(null);
 
   const { data: devices = [], isLoading: devicesLoading } = useQuery<Device[]>({
     queryKey: ['/api/devices'],
@@ -58,7 +58,7 @@ export default function Dashboard() {
     return { totalItems, expiringSoon, expired };
   }, [inventoryItems]);
 
-  // Filter items based on search and filter type
+  // Filter items based on search, filter type, and device
   const filteredItems = useMemo(() => {
     let filtered = inventoryItems;
 
@@ -69,6 +69,11 @@ export default function Dashboard() {
         item.name.toLowerCase().includes(query) ||
         item.category.toLowerCase().includes(query)
       );
+    }
+
+    // Filter by device
+    if (selectedDevice !== null) {
+      filtered = filtered.filter(item => item.deviceId === selectedDevice);
     }
 
     // Filter by type
@@ -90,7 +95,7 @@ export default function Dashboard() {
     }
 
     return filtered;
-  }, [inventoryItems, searchQuery, filterType]);
+  }, [inventoryItems, searchQuery, filterType, selectedDevice]);
 
   const displayedItems = displayLimit === -1 ? filteredItems : filteredItems.slice(0, displayLimit);
 
@@ -147,7 +152,6 @@ export default function Dashboard() {
               <h1 className="text-xl font-bold text-slate-900">CoolKeeper</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <LanguageSwitcher />
               {showFullList && (
                 <Button
                   variant="ghost"
@@ -159,13 +163,7 @@ export default function Dashboard() {
                   {t('dashboard:backToDashboard')}
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowSettingsModal(true)}
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
+              <HeaderMenu onSettingsClick={() => setShowSettingsModal(true)} />
             </div>
           </div>
         </div>
@@ -237,20 +235,16 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Search Section */}
-              <SearchSection
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                displayLimit={-1}
-                onDisplayLimitChange={setDisplayLimit}
-              />
-
               {/* Inventory Table */}
               <InventoryTable
                 items={paginatedItems}
                 totalItems={filteredItems.length}
                 displayLimit={-1}
                 devices={devices}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                selectedDevice={selectedDevice}
+                onDeviceFilterChange={setSelectedDevice}
               />
             </section>
           </>
@@ -298,20 +292,16 @@ export default function Dashboard() {
               </div>
             </section>
 
-            {/* Search Section */}
-            <SearchSection
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              displayLimit={displayLimit}
-              onDisplayLimitChange={setDisplayLimit}
-            />
-
             {/* Inventory Table */}
             <InventoryTable
               items={displayedItems}
               totalItems={filteredItems.length}
               displayLimit={displayLimit}
               devices={devices}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              selectedDevice={selectedDevice}
+              onDeviceFilterChange={setSelectedDevice}
             />
           </>
         )}

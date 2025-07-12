@@ -120,6 +120,21 @@ export default function DashboardCard({
 }: DashboardCardProps) {
   const IconComponent = iconMap[icon];
 
+  // Special layout for "add" cards (plus icon)
+  if (icon === 'plus') {
+    return (
+      <Card
+        className={cn(dashboardCardVariants({ color }))}
+        onClick={onClick}
+      >
+        <CardContent className="p-6 flex items-center justify-center min-h-[120px]">
+          <Plus className="w-12 h-12 text-white" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Default layout for other cards
   return (
     <Card
       className={cn(dashboardCardVariants({ color }))}

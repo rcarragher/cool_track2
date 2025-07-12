@@ -58,5 +58,9 @@
     "footer": {
       "showing": "Mostrando {{count}} de {{total}} artículos"
     }
+  },
+  "filters": {
+    "allDevices": "Todos los dispositivos",
+    "filterByDevice": "Filtrar por dispositivo:"
   }
 }

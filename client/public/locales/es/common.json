@@ -52,5 +52,9 @@
   "deviceTypes": {
     "refrigerator": "Refrigerador",
     "freezer": "Congelador"
+  },
+  "menu": {
+    "language": "Idioma",
+    "settings": "Configuración"
   }
 }

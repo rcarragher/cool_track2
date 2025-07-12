@@ -63,5 +63,9 @@
   },
   "fallbacks": {
     "unknownDevice": "Unknown Device"
+  },
+  "filters": {
+    "allDevices": "All Devices",
+    "filterByDevice": "Filter by device:"
   }
 }

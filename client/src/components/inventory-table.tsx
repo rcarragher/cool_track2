@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { cva } from "class-variance-authority";
@@ -16,6 +18,10 @@ interface InventoryTableProps {
   totalItems: number;
   displayLimit: number;
   devices: Device[];
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
+  selectedDevice?: number | null;
+  onDeviceFilterChange?: (deviceId: number | null) => void;
 }
 
 // Define variants using class-variance-authority
@@ -65,6 +71,10 @@ export default function InventoryTable({
   totalItems,
   displayLimit,
   devices,
+  searchQuery = "",
+  onSearchChange,
+  selectedDevice = null,
+  onDeviceFilterChange,
 }: InventoryTableProps) {
   const { t } = useTranslation(['inventory', 'common']);
   const { toast } = useToast();
@@ -157,7 +167,7 @@ export default function InventoryTable({
       <Card>
         <CardContent className="p-0">
           <div className="p-6 border-b border-slate-200">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-slate-900">{t('inventory:title')}</h3>
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
@@ -170,6 +180,46 @@ export default function InventoryTable({
                 </div>
               </div>
             </div>
+            
+            {/* Search and Filter Controls */}
+            {(onSearchChange || onDeviceFilterChange) && (
+              <div className="flex flex-col sm:flex-row gap-4 items-center">
+                {onSearchChange && (
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <Input
+                      type="text"
+                      placeholder={t('common:placeholders.searchItems')}
+                      value={searchQuery}
+                      onChange={(e) => onSearchChange(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                )}
+                
+                {onDeviceFilterChange && devices.length > 0 && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
+                    <span className="text-sm text-slate-600 whitespace-nowrap">{t('inventory:filters.filterByDevice')}</span>
+                    <Select 
+                      value={selectedDevice?.toString() || "all"} 
+                      onValueChange={(value) => onDeviceFilterChange(value === "all" ? null : parseInt(value))}
+                    >
+                      <SelectTrigger className="w-full sm:w-48 text-left">
+                        <SelectValue placeholder={t('inventory:filters.allDevices')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t('inventory:filters.allDevices')}</SelectItem>
+                        {devices.map(device => (
+                          <SelectItem key={device.id} value={device.id.toString()}>
+                            {device.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {items.length === 0 ? (
