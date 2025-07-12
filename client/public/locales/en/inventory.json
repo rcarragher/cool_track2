@@ -1,0 +1,67 @@
+{
+  "title": "Current Inventory",
+  "addModal": {
+    "title": "Add New Item",
+    "helpText": "Optional - leave blank for items that don't expire"
+  },
+  "table": {
+    "headers": {
+      "item": "Item",
+      "category": "Category",
+      "quantity": "Quantity",
+      "added": "Added",
+      "expires": "Expires",
+      "device": "Device",
+      "actions": "Actions"
+    },
+    "legend": {
+      "refrigerator": "Refrigerator",
+      "freezer": "Freezer"
+    },
+    "emptyState": {
+      "title": "No items found",
+      "description": "Your inventory is empty or no items match your search criteria."
+    },
+    "footer": {
+      "showing": "Showing {{count}} of {{total}} items"
+    }
+  },
+  "search": {
+    "title": "Search Inventory",
+    "showTop": "Show top",
+    "items": "items",
+    "all": "All"
+  },
+  "expiration": {
+    "expiredDays": "Expired {{days}} days ago",
+    "expiresIn": "Expires in {{days}} days",
+    "expiresOn": "Expires {{date}}"
+  },
+  "toast": {
+    "itemAdded": {
+      "title": "Item added",
+      "description": "The inventory item has been added successfully."
+    },
+    "itemDeleted": {
+      "title": "Item deleted",
+      "description": "The inventory item has been removed successfully."
+    },
+    "error": {
+      "title": "Error",
+      "addFailed": "Failed to add the item. Please try again.",
+      "deleteFailed": "Failed to delete the item. Please try again."
+    },
+    "comingSoon": {
+      "edit": "Edit feature coming soon",
+      "editDescription": "Item editing will be available in the next update.",
+      "loadMore": "Load more feature coming soon",
+      "loadMoreDescription": "Use the display limit selector to show more items."
+    }
+  },
+  "confirmations": {
+    "deleteItem": "Are you sure you want to delete this item?"
+  },
+  "fallbacks": {
+    "unknownDevice": "Unknown Device"
+  }
+}

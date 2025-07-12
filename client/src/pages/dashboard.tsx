@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Snowflake, Settings, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DashboardCard from "@/components/dashboard-card";
@@ -7,9 +8,11 @@ import SearchSection from "@/components/search-section";
 import InventoryTable from "@/components/inventory-table";
 import AddItemModal from "@/components/add-item-modal";
 import SettingsModal from "@/components/settings-modal";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import type { Device, InventoryItem } from "@shared/schema";
 
 export default function Dashboard() {
+  const { t } = useTranslation(['dashboard', 'common']);
   const [searchQuery, setSearchQuery] = useState("");
   const [displayLimit, setDisplayLimit] = useState(10);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -125,7 +128,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading CoolKeeper...</p>
+          <p className="text-slate-600">{t('dashboard:loading')}</p>
         </div>
       </div>
     );
@@ -144,6 +147,7 @@ export default function Dashboard() {
               <h1 className="text-xl font-bold text-slate-900">CoolKeeper</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <LanguageSwitcher />
               {showFullList && (
                 <Button
                   variant="ghost"
@@ -151,8 +155,8 @@ export default function Dashboard() {
                   onClick={() => setShowFullList(false)}
                   className="flex items-center"
                 >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Dashboard
+                  <ArrowLeft className="h-4 w-4 me-2" />
+                  {t('dashboard:backToDashboard')}
                 </Button>
               )}
               <Button
@@ -174,13 +178,13 @@ export default function Dashboard() {
             <section className="mb-8">
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                  {filterType === 'all' ? 'All Items' : 
-                   filterType === 'expiring' ? 'Expiring Soon' : 'Expired Items'}
+                  {filterType === 'all' ? t('dashboard:sections.allItems.title') : 
+                   filterType === 'expiring' ? t('dashboard:sections.expiringSoon.title') : t('dashboard:sections.expired.title')}
                 </h2>
                 <p className="text-slate-600">
-                  {filterType === 'all' ? 'Complete inventory listing' : 
-                   filterType === 'expiring' ? 'Items expiring in the next 3 days' : 
-                   'Items that have passed their expiration date'}
+                  {filterType === 'all' ? t('dashboard:sections.allItems.description') : 
+                   filterType === 'expiring' ? t('dashboard:sections.expiringSoon.description') : 
+                   t('dashboard:sections.expired.description')}
                 </p>
               </div>
 
@@ -188,10 +192,14 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-slate-600">
-                    Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredItems.length)} of {filteredItems.length} items
+                    {t('dashboard:pagination.showing', { 
+                      start: ((currentPage - 1) * itemsPerPage) + 1, 
+                      end: Math.min(currentPage * itemsPerPage, filteredItems.length), 
+                      total: filteredItems.length 
+                    })}
                   </span>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-slate-600">Items per page:</span>
+                    <span className="text-sm text-slate-600">{t('dashboard:pagination.itemsPerPage')}</span>
                     <select 
                       value={itemsPerPage} 
                       onChange={(e) => {
@@ -213,10 +221,10 @@ export default function Dashboard() {
                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
                   >
-                    Previous
+                    {t('common:buttons.previous')}
                   </Button>
                   <span className="px-3 py-1 text-sm">
-                    Page {currentPage} of {totalPages}
+                    {t('dashboard:pagination.pageOf', { current: currentPage, total: totalPages })}
                   </span>
                   <Button
                     variant="outline"
@@ -224,7 +232,7 @@ export default function Dashboard() {
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
                   >
-                    Next
+                    {t('common:buttons.next')}
                   </Button>
                 </div>
               </div>
@@ -251,40 +259,40 @@ export default function Dashboard() {
             {/* Dashboard Section */}
             <section className="mb-8">
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">Dashboard</h2>
-                <p className="text-slate-600">Overview of your inventory status</p>
+                <h2 className="text-2xl font-bold text-slate-900 mb-2">{t('dashboard:title')}</h2>
+                <p className="text-slate-600">{t('dashboard:subtitle')}</p>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 <DashboardCard
-                  title="Total Items"
+                  title={t('dashboard:cards.totalItems')}
                   value={dashboardStats.totalItems}
                   icon="box"
                   color="blue"
                   onClick={() => handleCardClick('total')}
                 />
                 <DashboardCard
-                  title="Expiring Soon"
+                  title={t('dashboard:cards.expiringSoon')}
                   value={dashboardStats.expiringSoon}
                   icon="clock"
                   color="warning"
-                  subtitle="Next 3 days"
+                  subtitle={t('dashboard:cards.subtitles.next3Days')}
                   onClick={() => handleCardClick('expiring')}
                 />
                 <DashboardCard
-                  title="Expired Items"
+                  title={t('dashboard:cards.expiredItems')}
                   value={dashboardStats.expired}
                   icon="warning"
                   color="expired"
-                  subtitle="Needs attention"
+                  subtitle={t('dashboard:cards.subtitles.needsAttention')}
                   onClick={() => handleCardClick('expired')}
                 />
                 <DashboardCard
-                  title="Add Items"
+                  title={t('dashboard:cards.addItems')}
                   value="+"
                   icon="plus"
                   color="gradient"
-                  subtitle="Add new inventory"
+                  subtitle={t('dashboard:cards.subtitles.addNewInventory')}
                   onClick={() => handleCardClick('add')}
                 />
               </div>

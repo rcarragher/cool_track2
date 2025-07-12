@@ -1,0 +1,39 @@
+{
+  "title": "Settings",
+  "sections": {
+    "deviceManagement": "Device Management",
+    "displaySettings": "Display Settings"
+  },
+  "deviceForm": {
+    "addDevice": "Add Device",
+    "deviceName": "Device Name *",
+    "deviceType": "Device Type *",
+    "adding": "Adding..."
+  },
+  "displayForm": {
+    "defaultItemsToShow": "Default items to show",
+    "expirationWarningDays": "Expiration warning days"
+  },
+  "toast": {
+    "deviceAdded": {
+      "title": "Device added",
+      "description": "The device has been added successfully."
+    },
+    "deviceDeleted": {
+      "title": "Device deleted",
+      "description": "The device has been removed successfully."
+    },
+    "error": {
+      "title": "Error",
+      "addFailed": "Failed to add the device. Please try again.",
+      "deleteFailed": "Failed to delete the device. Please try again."
+    },
+    "comingSoon": {
+      "edit": "Edit feature coming soon",
+      "editDescription": "Device editing will be available in the next update."
+    }
+  },
+  "confirmations": {
+    "deleteDevice": "Are you sure you want to delete this device? This action cannot be undone."
+  }
+}

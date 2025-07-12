@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Edit, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ export default function InventoryTable({
   displayLimit,
   devices,
 }: InventoryTableProps) {
+  const { t } = useTranslation(['inventory', 'common']);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -31,21 +33,21 @@ export default function InventoryTable({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inventory'] });
       toast({
-        title: "Item deleted",
-        description: "The inventory item has been removed successfully.",
+        title: t('inventory:toast.itemDeleted.title'),
+        description: t('inventory:toast.itemDeleted.description'),
       });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete the item. Please try again.",
+        title: t('inventory:toast.error.title'),
+        description: t('inventory:toast.error.deleteFailed'),
         variant: "destructive",
       });
     },
   });
 
   const handleDelete = (id: number) => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
+    if (window.confirm(t('inventory:confirmations.deleteItem'))) {
       deleteItemMutation.mutate(id);
     }
   };
@@ -65,8 +67,23 @@ export default function InventoryTable({
     }
   };
 
+  const getCategoryName = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'meat':
+        return t('common:categories.meat');
+      case 'cocktail':
+        return t('common:categories.cocktail');
+      case 'fruit-veg':
+        return t('common:categories.fruitVeg');
+      case 'prepared':
+        return t('common:categories.prepared');
+      default:
+        return category;
+    }
+  };
+
   const getExpirationStatus = (expirationDate: string | null) => {
-    if (!expirationDate) return { text: 'No expiration', color: 'bg-slate-100 text-slate-800' };
+    if (!expirationDate) return { text: t('common:status.noExpiration'), color: 'bg-slate-100 text-slate-800' };
     
     const today = new Date();
     const expDate = new Date(expirationDate);
@@ -74,17 +91,17 @@ export default function InventoryTable({
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays < 0) {
-      return { text: `Expired ${Math.abs(diffDays)} days ago`, color: 'bg-red-100 text-red-800' };
+      return { text: t('inventory:expiration.expiredDays', { days: Math.abs(diffDays) }), color: 'bg-red-100 text-red-800' };
     } else if (diffDays <= 3) {
-      return { text: `Expires in ${diffDays} days`, color: 'bg-yellow-100 text-yellow-800' };
+      return { text: t('inventory:expiration.expiresIn', { days: diffDays }), color: 'bg-yellow-100 text-yellow-800' };
     } else {
-      return { text: `Expires ${expDate.toLocaleDateString()}`, color: 'bg-green-100 text-green-800' };
+      return { text: t('inventory:expiration.expiresOn', { date: expDate.toLocaleDateString() }), color: 'bg-green-100 text-green-800' };
     }
   };
 
   const getDeviceName = (deviceId: number) => {
     const device = devices.find(d => d.id === deviceId);
-    return device ? device.name : 'Unknown Device';
+    return device ? device.name : t('inventory:fallbacks.unknownDevice');
   };
 
   const getDeviceTypeColor = (deviceId: number) => {
@@ -98,15 +115,15 @@ export default function InventoryTable({
         <CardContent className="p-0">
           <div className="p-6 border-b border-slate-200">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900">Current Inventory</h3>
+              <h3 className="text-lg font-semibold text-slate-900">{t('inventory:title')}</h3>
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm text-slate-600">Refrigerator</span>
+                  <span className="text-sm text-slate-600">{t('inventory:table.legend.refrigerator')}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                  <span className="text-sm text-slate-600">Freezer</span>
+                  <span className="text-sm text-slate-600">{t('inventory:table.legend.freezer')}</span>
                 </div>
               </div>
             </div>
@@ -117,8 +134,8 @@ export default function InventoryTable({
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <div className="text-slate-400 text-2xl">📦</div>
               </div>
-              <h4 className="text-lg font-medium text-slate-900 mb-2">No items found</h4>
-              <p className="text-slate-600">Your inventory is empty or no items match your search criteria.</p>
+              <h4 className="text-lg font-medium text-slate-900 mb-2">{t('inventory:table.emptyState.title')}</h4>
+              <p className="text-slate-600">{t('inventory:table.emptyState.description')}</p>
             </div>
           ) : (
             <>
@@ -126,13 +143,13 @@ export default function InventoryTable({
                 <table className="w-full">
                   <thead className="bg-slate-50">
                     <tr>
-                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Item</th>
-                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Category</th>
-                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Quantity</th>
-                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Added</th>
-                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Expires</th>
-                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">Device</th>
-                      <th className="text-right py-3 px-6 text-sm font-medium text-slate-600">Actions</th>
+                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">{t('inventory:table.headers.item')}</th>
+                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">{t('inventory:table.headers.category')}</th>
+                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">{t('inventory:table.headers.quantity')}</th>
+                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">{t('inventory:table.headers.added')}</th>
+                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">{t('inventory:table.headers.expires')}</th>
+                      <th className="text-left py-3 px-6 text-sm font-medium text-slate-600">{t('inventory:table.headers.device')}</th>
+                      <th className="text-right py-3 px-6 text-sm font-medium text-slate-600">{t('inventory:table.headers.actions')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
@@ -149,7 +166,7 @@ export default function InventoryTable({
                           </td>
                           <td className="py-4 px-6">
                             <Badge className={getCategoryColor(item.category)}>
-                              {item.category}
+                              {getCategoryName(item.category)}
                             </Badge>
                           </td>
                           <td className="py-4 px-6 text-sm text-slate-600">{item.quantity}</td>
@@ -171,8 +188,8 @@ export default function InventoryTable({
                                 onClick={() => {
                                   // TODO: Implement edit functionality
                                   toast({
-                                    title: "Edit feature coming soon",
-                                    description: "Item editing will be available in the next update.",
+                                    title: t('inventory:toast.comingSoon.edit'),
+                                    description: t('inventory:toast.comingSoon.editDescription'),
                                   });
                                 }}
                               >
@@ -199,7 +216,7 @@ export default function InventoryTable({
               <div className="p-6 border-t border-slate-200 bg-slate-50">
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-slate-600">
-                    Showing <span className="font-medium">{items.length}</span> of <span className="font-medium">{totalItems}</span> items
+{t('inventory:table.footer.showing', { count: items.length, total: totalItems })}
                   </div>
                   {displayLimit !== -1 && items.length >= displayLimit && (
                     <div className="flex items-center space-x-2">
@@ -209,12 +226,12 @@ export default function InventoryTable({
                         onClick={() => {
                           // TODO: Implement load more functionality
                           toast({
-                            title: "Load more feature coming soon",
-                            description: "Use the display limit selector to show more items.",
+                            title: t('inventory:toast.comingSoon.loadMore'),
+                            description: t('inventory:toast.comingSoon.loadMoreDescription'),
                           });
                         }}
                       >
-                        Load More
+{t('common:buttons.loadMore')}
                       </Button>
                     </div>
                   )}

@@ -87,4 +87,8 @@ export default {
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  // Enable RTL support
+  corePlugins: {
+    // Keep all core plugins enabled and add RTL support through utilities
+  },
 } satisfies Config;

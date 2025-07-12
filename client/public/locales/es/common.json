@@ -1,0 +1,56 @@
+{
+  "buttons": {
+    "add": "Agregar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "save": "Guardar",
+    "confirm": "Confirmar",
+    "loadMore": "Cargar más",
+    "previous": "Anterior",
+    "next": "Siguiente"
+  },
+  "labels": {
+    "name": "Nombre",
+    "category": "Categoría",
+    "quantity": "Cantidad",
+    "device": "Dispositivo",
+    "dateAdded": "Fecha agregada",
+    "expirationDate": "Fecha de vencimiento",
+    "actions": "Acciones",
+    "search": "Buscar",
+    "filter": "Filtrar"
+  },
+  "placeholders": {
+    "enterItemName": "Ingrese el nombre del artículo",
+    "enterDeviceName": "Ingrese el nombre del dispositivo",
+    "selectCategory": "Seleccionar categoría",
+    "selectDevice": "Seleccionar dispositivo",
+    "selectType": "Seleccionar tipo",
+    "searchItems": "Buscar por nombre, categoría o fecha de vencimiento..."
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "pleaseSelectDevice": "Por favor seleccione un dispositivo",
+    "pleaseSelectCategory": "Por favor seleccione una categoría"
+  },
+  "status": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "expired": "Vencido",
+    "expiring": "Por vencer",
+    "noExpiration": "Sin vencimiento"
+  },
+  "categories": {
+    "meat": "Carne",
+    "cocktail": "Suministros de cócteles",
+    "fruitVeg": "Frutas/Verduras",
+    "prepared": "Comidas preparadas"
+  },
+  "deviceTypes": {
+    "refrigerator": "Refrigerador",
+    "freezer": "Congelador"
+  }
+}

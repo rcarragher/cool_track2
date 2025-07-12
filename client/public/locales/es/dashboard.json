@@ -1,0 +1,36 @@
+{
+  "title": "Panel de control",
+  "subtitle": "Resumen del estado de su inventario",
+  "loading": "Cargando CoolKeeper...",
+  "backToDashboard": "Volver al Panel",
+  "cards": {
+    "totalItems": "Total de artículos",
+    "expiringSoon": "Por vencer pronto",
+    "expiredItems": "Artículos vencidos",
+    "addItems": "Agregar artículos",
+    "subtitles": {
+      "next3Days": "Próximos 3 días",
+      "needsAttention": "Necesita atención",
+      "addNewInventory": "Agregar nuevo inventario"
+    }
+  },
+  "sections": {
+    "allItems": {
+      "title": "Todos los artículos",
+      "description": "Lista completa del inventario"
+    },
+    "expiringSoon": {
+      "title": "Por vencer pronto",
+      "description": "Artículos que vencen en los próximos 3 días"
+    },
+    "expired": {
+      "title": "Artículos vencidos",
+      "description": "Artículos que han pasado su fecha de vencimiento"
+    }
+  },
+  "pagination": {
+    "showing": "Mostrando {{start}} a {{end}} de {{total}} artículos",
+    "itemsPerPage": "Artículos por página:",
+    "pageOf": "Página {{current}} de {{total}}"
+  }
+}

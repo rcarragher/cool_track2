@@ -1,0 +1,62 @@
+{
+  "title": "Inventario actual",
+  "addModal": {
+    "title": "Agregar nuevo artículo",
+    "helpText": "Opcional - deje en blanco para artículos que no caducan"
+  },
+  "search": {
+    "title": "Buscar inventario",
+    "showTop": "Mostrar primeros",
+    "items": "artículos",
+    "all": "Todos"
+  },
+  "expiration": {
+    "expiredDays": "Venció hace {{days}} días",
+    "expiresIn": "Vence en {{days}} días",
+    "expiresOn": "Vence {{date}}"
+  },
+  "toast": {
+    "itemDeleted": {
+      "title": "Artículo eliminado",
+      "description": "El artículo del inventario ha sido eliminado exitosamente."
+    },
+    "error": {
+      "title": "Error",
+      "deleteFailed": "Error al eliminar el artículo. Inténtalo de nuevo."
+    },
+    "comingSoon": {
+      "edit": "Función de edición próximamente",
+      "editDescription": "La edición de artículos estará disponible en la próxima actualización.",
+      "loadMore": "Función cargar más próximamente",
+      "loadMoreDescription": "Use el selector de límite de visualización para mostrar más artículos."
+    }
+  },
+  "confirmations": {
+    "deleteItem": "¿Estás seguro de que deseas eliminar este artículo?"
+  },
+  "fallbacks": {
+    "unknownDevice": "Dispositivo desconocido"
+  },
+  "table": {
+    "headers": {
+      "item": "Artículo",
+      "category": "Categoría",
+      "quantity": "Cantidad",
+      "added": "Agregado",
+      "expires": "Vence",
+      "device": "Dispositivo",
+      "actions": "Acciones"
+    },
+    "legend": {
+      "refrigerator": "Refrigerador",
+      "freezer": "Congelador"
+    },
+    "emptyState": {
+      "title": "No se encontraron artículos",
+      "description": "Su inventario está vacío o ningún artículo coincide con sus criterios de búsqueda."
+    },
+    "footer": {
+      "showing": "Mostrando {{count}} de {{total}} artículos"
+    }
+  }
+}

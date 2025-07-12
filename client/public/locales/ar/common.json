@@ -1,0 +1,56 @@
+{
+  "buttons": {
+    "add": "إضافة",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "save": "حفظ",
+    "confirm": "تأكيد",
+    "loadMore": "تحميل المزيد",
+    "previous": "السابق",
+    "next": "التالي"
+  },
+  "labels": {
+    "name": "الاسم",
+    "category": "الفئة",
+    "quantity": "الكمية",
+    "device": "الجهاز",
+    "dateAdded": "تاريخ الإضافة",
+    "expirationDate": "تاريخ انتهاء الصلاحية",
+    "actions": "الإجراءات",
+    "search": "بحث",
+    "filter": "تصفية"
+  },
+  "placeholders": {
+    "enterItemName": "أدخل اسم العنصر",
+    "enterDeviceName": "أدخل اسم الجهاز",
+    "selectCategory": "اختر الفئة",
+    "selectDevice": "اختر الجهاز",
+    "selectType": "اختر النوع",
+    "searchItems": "البحث بالاسم أو الفئة أو تاريخ انتهاء الصلاحية..."
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "pleaseSelectDevice": "يرجى اختيار جهاز",
+    "pleaseSelectCategory": "يرجى اختيار فئة"
+  },
+  "status": {
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "نجح",
+    "expired": "منتهي الصلاحية",
+    "expiring": "ينتهي قريباً",
+    "noExpiration": "بدون انتهاء صلاحية"
+  },
+  "categories": {
+    "meat": "لحوم",
+    "cocktail": "مستلزمات الكوكتيل",
+    "fruitVeg": "فواكه/خضروات",
+    "prepared": "وجبات جاهزة"
+  },
+  "deviceTypes": {
+    "refrigerator": "ثلاجة",
+    "freezer": "فريزر"
+  }
+}

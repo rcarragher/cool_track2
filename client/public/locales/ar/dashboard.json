@@ -1,0 +1,36 @@
+{
+  "title": "لوحة التحكم",
+  "subtitle": "نظرة عامة على حالة المخزون",
+  "loading": "جاري تحميل CoolKeeper...",
+  "backToDashboard": "العودة للوحة التحكم",
+  "cards": {
+    "totalItems": "إجمالي العناصر",
+    "expiringSoon": "ينتهي قريباً",
+    "expiredItems": "عناصر منتهية الصلاحية",
+    "addItems": "إضافة عناصر",
+    "subtitles": {
+      "next3Days": "الأيام الثلاثة القادمة",
+      "needsAttention": "يحتاج انتباه",
+      "addNewInventory": "إضافة مخزون جديد"
+    }
+  },
+  "sections": {
+    "allItems": {
+      "title": "جميع العناصر",
+      "description": "قائمة المخزون الكاملة"
+    },
+    "expiringSoon": {
+      "title": "ينتهي قريباً",
+      "description": "العناصر التي تنتهي صلاحيتها خلال 3 أيام"
+    },
+    "expired": {
+      "title": "عناصر منتهية الصلاحية",
+      "description": "العناصر التي تجاوزت تاريخ انتهاء الصلاحية"
+    }
+  },
+  "pagination": {
+    "showing": "عرض {{start}} إلى {{end}} من {{total}} عنصر",
+    "itemsPerPage": "عناصر لكل صفحة:",
+    "pageOf": "صفحة {{current}} من {{total}}"
+  }
+}

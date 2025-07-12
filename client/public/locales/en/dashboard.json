@@ -1,0 +1,36 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Overview of your inventory status",
+  "loading": "Loading CoolKeeper...",
+  "backToDashboard": "Back to Dashboard",
+  "cards": {
+    "totalItems": "Total Items",
+    "expiringSoon": "Expiring Soon",
+    "expiredItems": "Expired Items",
+    "addItems": "Add Items",
+    "subtitles": {
+      "next3Days": "Next 3 days",
+      "needsAttention": "Needs attention",
+      "addNewInventory": "Add new inventory"
+    }
+  },
+  "sections": {
+    "allItems": {
+      "title": "All Items",
+      "description": "Complete inventory listing"
+    },
+    "expiringSoon": {
+      "title": "Expiring Soon",
+      "description": "Items expiring in the next 3 days"
+    },
+    "expired": {
+      "title": "Expired Items",
+      "description": "Items that have passed their expiration date"
+    }
+  },
+  "pagination": {
+    "showing": "Showing {{start}} to {{end}} of {{total}} items",
+    "itemsPerPage": "Items per page:",
+    "pageOf": "Page {{current}} of {{total}}"
+  }
+}

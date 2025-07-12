@@ -1,0 +1,56 @@
+{
+  "buttons": {
+    "add": "Add",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "confirm": "Confirm",
+    "loadMore": "Load More",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "labels": {
+    "name": "Name",
+    "category": "Category",
+    "quantity": "Quantity",
+    "device": "Device",
+    "dateAdded": "Date Added",
+    "expirationDate": "Expiration Date",
+    "actions": "Actions",
+    "search": "Search",
+    "filter": "Filter"
+  },
+  "placeholders": {
+    "enterItemName": "Enter item name",
+    "enterDeviceName": "Enter device name",
+    "selectCategory": "Select category",
+    "selectDevice": "Select device",
+    "selectType": "Select type",
+    "searchItems": "Search by item name, category, or expiration date..."
+  },
+  "validation": {
+    "required": "This field is required",
+    "pleaseSelectDevice": "Please select a device",
+    "pleaseSelectCategory": "Please select a category"
+  },
+  "status": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "expired": "Expired",
+    "expiring": "Expiring",
+    "noExpiration": "No expiration"
+  },
+  "categories": {
+    "meat": "Meat",
+    "cocktail": "Cocktail Supplies",
+    "fruitVeg": "Fruit/Veg",
+    "prepared": "Prepared Meals"
+  },
+  "deviceTypes": {
+    "refrigerator": "Refrigerator",
+    "freezer": "Freezer"
+  }
+}

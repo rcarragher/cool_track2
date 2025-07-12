@@ -1,0 +1,62 @@
+{
+  "title": "المخزون الحالي",
+  "addModal": {
+    "title": "إضافة عنصر جديد",
+    "helpText": "اختياري - اتركه فارغاً للعناصر التي لا تنتهي صلاحيتها"
+  },
+  "search": {
+    "title": "البحث في المخزون",
+    "showTop": "إظهار أعلى",
+    "items": "عناصر",
+    "all": "الكل"
+  },
+  "expiration": {
+    "expiredDays": "انتهت صلاحيته منذ {{days}} أيام",
+    "expiresIn": "تنتهي صلاحيته خلال {{days}} أيام",
+    "expiresOn": "تنتهي صلاحيته {{date}}"
+  },
+  "toast": {
+    "itemDeleted": {
+      "title": "تم حذف العنصر",
+      "description": "تم حذف عنصر المخزون بنجاح."
+    },
+    "error": {
+      "title": "خطأ",
+      "deleteFailed": "فشل في حذف العنصر. حاول مرة أخرى."
+    },
+    "comingSoon": {
+      "edit": "ميزة التعديل قريباً",
+      "editDescription": "سيكون تعديل العناصر متاحاً في التحديث القادم.",
+      "loadMore": "ميزة تحميل المزيد قريباً",
+      "loadMoreDescription": "استخدم محدد حد العرض لإظهار المزيد من العناصر."
+    }
+  },
+  "confirmations": {
+    "deleteItem": "هل أنت متأكد من أنك تريد حذف هذا العنصر؟"
+  },
+  "fallbacks": {
+    "unknownDevice": "جهاز غير معروف"
+  },
+  "table": {
+    "headers": {
+      "item": "العنصر",
+      "category": "الفئة",
+      "quantity": "الكمية",
+      "added": "مُضاف",
+      "expires": "ينتهي",
+      "device": "الجهاز",
+      "actions": "الإجراءات"
+    },
+    "legend": {
+      "refrigerator": "ثلاجة",
+      "freezer": "فريزر"
+    },
+    "emptyState": {
+      "title": "لم يتم العثور على عناصر",
+      "description": "مخزونك فارغ أو لا توجد عناصر تطابق معايير البحث."
+    },
+    "footer": {
+      "showing": "عرض {{count}} من {{total}} عنصر"
+    }
+  }
+}
