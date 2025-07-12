@@ -5,7 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Commands
 
 ### Core Development
-- `npm run dev` - Start development server (both frontend and backend)
+- `npm run dev` - Start development server with live reloading (both frontend and backend)
+- `npm run dev:server` - Start only the backend server with live reloading
+- `npm run dev:client` - Start only the frontend client with Vite dev server
 - `npm run build` - Build for production (frontend with Vite, backend with esbuild)
 - `npm run start` - Start production server
 - `npm run check` - TypeScript type checking
@@ -60,10 +62,11 @@ RESTful API with `/api` prefix:
 - No global client state management beyond query cache
 
 ### Development Environment
-- Replit-specific plugins for development tools
-- Hot module replacement via Vite
-- API request logging middleware
-- Error handling with custom error modal overlay
+- **Frontend HMR**: Vite provides instant hot module replacement for React components
+- **Backend Live Reload**: tsx --watch automatically restarts server on file changes
+- **API Logging**: Request logging middleware for debugging
+- **Error Overlay**: Custom error modal for runtime errors
+- **Replit Integration**: Specialized plugins for Replit development environment
 
 ### Component Structure
 - `components/ui/` - shadcn/ui component library (30+ components)
