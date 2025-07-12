@@ -1,12 +1,12 @@
 import { Box, Clock, AlertTriangle, Plus, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
 
-interface DashboardCardProps {
+interface DashboardCardProps extends VariantProps<typeof dashboardCardVariants> {
   title: string;
   value: string | number;
   icon: 'box' | 'clock' | 'warning' | 'plus';
-  color: 'blue' | 'warning' | 'expired' | 'gradient';
   subtitle?: string;
   onClick?: () => void;
 }
@@ -17,6 +17,98 @@ const iconMap = {
   warning: AlertTriangle,
   plus: Plus,
 };
+
+// Define variants using class-variance-authority
+const dashboardCardVariants = cva(
+  "cursor-pointer transition-all duration-200 hover:shadow-md group",
+  {
+    variants: {
+      color: {
+        blue: "",
+        warning: "",
+        expired: "",
+        gradient: "bg-gradient-primary text-white",
+      },
+    },
+    defaultVariants: {
+      color: "blue",
+    },
+  }
+);
+
+// Separate style variants for different elements
+const titleVariants = cva("text-sm font-medium mb-1", {
+  variants: {
+    color: {
+      blue: "text-slate-600",
+      warning: "text-slate-600", 
+      expired: "text-slate-600",
+      gradient: "text-blue-100",
+    },
+  },
+  defaultVariants: {
+    color: "blue",
+  },
+});
+
+const valueVariants = cva("text-3xl font-bold", {
+  variants: {
+    color: {
+      blue: "text-slate-900",
+      warning: "text-brand-warning",
+      expired: "text-brand-expired", 
+      gradient: "text-white",
+    },
+  },
+  defaultVariants: {
+    color: "blue",
+  },
+});
+
+const iconContainerVariants = cva(
+  "w-12 h-12 rounded-lg flex items-center justify-center transition-colors",
+  {
+    variants: {
+      color: {
+        blue: "bg-brand-blue bg-opacity-10 group-hover:bg-opacity-20",
+        warning: "bg-brand-warning bg-opacity-10 group-hover:bg-opacity-20",
+        expired: "bg-brand-expired bg-opacity-10 group-hover:bg-opacity-20",
+        gradient: "bg-white bg-opacity-20 group-hover:bg-opacity-30",
+      },
+    },
+    defaultVariants: {
+      color: "blue",
+    },
+  }
+);
+
+const iconVariants = cva("w-6 h-6", {
+  variants: {
+    color: {
+      blue: "text-brand-blue",
+      warning: "text-brand-warning",
+      expired: "text-brand-expired",
+      gradient: "text-white",
+    },
+  },
+  defaultVariants: {
+    color: "blue",
+  },
+});
+
+const subtitleVariants = cva("mt-4 flex items-center text-sm", {
+  variants: {
+    color: {
+      blue: "text-slate-600",
+      warning: "text-slate-600",
+      expired: "text-slate-600", 
+      gradient: "text-blue-100",
+    },
+  },
+  defaultVariants: {
+    color: "blue",
+  },
+});
 
 export default function DashboardCard({
   title,
@@ -30,51 +122,24 @@ export default function DashboardCard({
 
   return (
     <Card
-      className={cn(
-        "cursor-pointer transition-all duration-200 hover:shadow-md group",
-        color === 'gradient' && "bg-gradient-to-br from-[hsl(207,90%,54%)] to-[hsl(200,98%,39%)] text-white"
-      )}
+      className={cn(dashboardCardVariants({ color }))}
       onClick={onClick}
     >
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className={cn(
-              "text-sm font-medium mb-1",
-              color === 'gradient' ? "text-blue-100" : "text-slate-600"
-            )}>
+            <p className={cn(titleVariants({ color }))}>
               {title}
             </p>
-            <p className={cn(
-              "text-3xl font-bold",
-              color === 'blue' && "text-slate-900",
-              color === 'warning' && "text-brand-warning",
-              color === 'expired' && "text-brand-expired",
-              color === 'gradient' && "text-white"
-            )}>
+            <p className={cn(valueVariants({ color }))}>
               {value}
             </p>
           </div>
-          <div className={cn(
-            "w-12 h-12 rounded-lg flex items-center justify-center transition-colors",
-            color === 'blue' && "bg-brand-blue bg-opacity-10 group-hover:bg-opacity-20",
-            color === 'warning' && "bg-brand-warning bg-opacity-10 group-hover:bg-opacity-20",
-            color === 'expired' && "bg-brand-expired bg-opacity-10 group-hover:bg-opacity-20",
-            color === 'gradient' && "bg-white bg-opacity-20 group-hover:bg-opacity-30"
-          )}>
-            <IconComponent className={cn(
-              "w-6 h-6",
-              color === 'blue' && "text-brand-blue",
-              color === 'warning' && "text-brand-warning",
-              color === 'expired' && "text-brand-expired",
-              color === 'gradient' && "text-white"
-            )} />
+          <div className={cn(iconContainerVariants({ color }))}>
+            <IconComponent className={cn(iconVariants({ color }))} />
           </div>
         </div>
-        <div className={cn(
-          "mt-4 flex items-center text-sm",
-          color === 'gradient' ? "text-blue-100" : "text-slate-600"
-        )}>
+        <div className={cn(subtitleVariants({ color }))}>
           <ArrowRight className="w-4 h-4 mr-2" />
           <span>{subtitle || "View details"}</span>
         </div>

@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertInventoryItemSchema } from "@shared/schema";
+import { cva } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 import type { Device, InsertInventoryItem } from "@shared/schema";
 import { z } from "zod";
 
@@ -25,6 +27,19 @@ interface AddItemModalProps {
   onClose: () => void;
   devices: Device[];
 }
+
+// Define variants using class-variance-authority
+const formInputVariants = cva("", {
+  variants: {
+    error: {
+      true: "form-input-error",
+      false: "",
+    },
+  },
+  defaultVariants: {
+    error: false,
+  },
+});
 
 export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalProps) {
   const { toast } = useToast();
@@ -99,7 +114,7 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
               id="name"
               {...form.register("name")}
               placeholder="Enter item name"
-              className={form.formState.errors.name ? "border-red-500" : ""}
+              className={cn(formInputVariants({ error: !!form.formState.errors.name }))}
             />
             {form.formState.errors.name && (
               <p className="text-sm text-red-600">{form.formState.errors.name.message}</p>
@@ -112,7 +127,7 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
               value={form.watch("category") || ""} 
               onValueChange={(value) => form.setValue("category", value)}
             >
-              <SelectTrigger className={form.formState.errors.category ? "border-red-500" : ""}>
+              <SelectTrigger className={cn(formInputVariants({ error: !!form.formState.errors.category }))}>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
@@ -133,7 +148,7 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
               id="quantity"
               {...form.register("quantity")}
               placeholder="e.g., 2 containers, 1.5 lbs"
-              className={form.formState.errors.quantity ? "border-red-500" : ""}
+              className={cn(formInputVariants({ error: !!form.formState.errors.quantity }))}
             />
             {form.formState.errors.quantity && (
               <p className="text-sm text-red-600">{form.formState.errors.quantity.message}</p>
@@ -146,7 +161,7 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
               value={form.watch("deviceId")?.toString() || ""} 
               onValueChange={(value) => form.setValue("deviceId", parseInt(value))}
             >
-              <SelectTrigger className={form.formState.errors.deviceId ? "border-red-500" : ""}>
+              <SelectTrigger className={cn(formInputVariants({ error: !!form.formState.errors.deviceId }))}>
                 <SelectValue placeholder="Select device" />
               </SelectTrigger>
               <SelectContent>

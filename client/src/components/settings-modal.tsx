@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertDeviceSchema } from "@shared/schema";
+import { cva } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 import type { Device, InsertDevice } from "@shared/schema";
 import { z } from "zod";
 
@@ -22,6 +24,31 @@ interface SettingsModalProps {
   onClose: () => void;
   devices: Device[];
 }
+
+// Define variants using class-variance-authority
+const formInputVariants = cva("", {
+  variants: {
+    error: {
+      true: "form-input-error",
+      false: "",
+    },
+  },
+  defaultVariants: {
+    error: false,
+  },
+});
+
+const deviceTypeIconVariants = cva("text-brand-blue", {
+  variants: {
+    type: {
+      refrigerator: "text-brand-blue",
+      freezer: "text-brand-sky",
+    },
+  },
+  defaultVariants: {
+    type: "refrigerator",
+  },
+});
 
 export default function SettingsModal({ isOpen, onClose, devices }: SettingsModalProps) {
   const { toast } = useToast();
@@ -109,7 +136,7 @@ export default function SettingsModal({ isOpen, onClose, devices }: SettingsModa
               {devices.map((device) => (
                 <div key={device.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <div className="text-brand-blue">
+                    <div className={cn(deviceTypeIconVariants({ type: device.type as any }))}>
                       {device.type === 'refrigerator' ? '❄️' : '🧊'}
                     </div>
                     <span className="font-medium text-slate-900">{device.name}</span>
@@ -150,7 +177,7 @@ export default function SettingsModal({ isOpen, onClose, devices }: SettingsModa
                     id="deviceName"
                     {...form.register("name")}
                     placeholder="Enter device name"
-                    className={form.formState.errors.name ? "border-red-500" : ""}
+                    className={cn(formInputVariants({ error: !!form.formState.errors.name }))}
                   />
                   {form.formState.errors.name && (
                     <p className="text-sm text-red-600">{form.formState.errors.name.message}</p>
@@ -160,7 +187,7 @@ export default function SettingsModal({ isOpen, onClose, devices }: SettingsModa
                 <div className="space-y-2">
                   <Label htmlFor="deviceType">Device Type *</Label>
                   <Select onValueChange={(value) => form.setValue("type", value)}>
-                    <SelectTrigger className={form.formState.errors.type ? "border-red-500" : ""}>
+                    <SelectTrigger className={cn(formInputVariants({ error: !!form.formState.errors.type }))}>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>

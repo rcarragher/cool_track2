@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { cva } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 import type { InventoryItem, Device } from "@shared/schema";
 
 interface InventoryTableProps {
@@ -15,6 +17,48 @@ interface InventoryTableProps {
   displayLimit: number;
   devices: Device[];
 }
+
+// Define variants using class-variance-authority
+const categoryBadgeVariants = cva("", {
+  variants: {
+    category: {
+      meat: "badge-category-meat",
+      cocktail: "badge-category-cocktail",
+      "fruit-veg": "badge-category-fruit-veg",
+      prepared: "badge-category-prepared",
+      default: "bg-gray-100 text-gray-800",
+    },
+  },
+  defaultVariants: {
+    category: "default",
+  },
+});
+
+const expirationBadgeVariants = cva("", {
+  variants: {
+    status: {
+      expired: "badge-status-expired",
+      warning: "badge-status-warning",
+      good: "badge-status-good",
+      none: "badge-status-none",
+    },
+  },
+  defaultVariants: {
+    status: "none",
+  },
+});
+
+const deviceIndicatorVariants = cva("w-2 h-2 rounded-full", {
+  variants: {
+    type: {
+      refrigerator: "bg-blue-500",
+      freezer: "bg-purple-500",
+    },
+  },
+  defaultVariants: {
+    type: "refrigerator",
+  },
+});
 
 export default function InventoryTable({
   items,
@@ -52,21 +96,6 @@ export default function InventoryTable({
     }
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category.toLowerCase()) {
-      case 'meat':
-        return 'bg-red-100 text-red-800';
-      case 'cocktail':
-        return 'bg-blue-100 text-blue-800';
-      case 'fruit-veg':
-        return 'bg-green-100 text-green-800';
-      case 'prepared':
-        return 'bg-purple-100 text-purple-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const getCategoryName = (category: string) => {
     switch (category.toLowerCase()) {
       case 'meat':
@@ -83,7 +112,12 @@ export default function InventoryTable({
   };
 
   const getExpirationStatus = (expirationDate: string | null) => {
-    if (!expirationDate) return { text: t('common:status.noExpiration'), color: 'bg-slate-100 text-slate-800' };
+    if (!expirationDate) {
+      return { 
+        text: t('common:status.noExpiration'), 
+        status: 'none' as const 
+      };
+    }
     
     const today = new Date();
     const expDate = new Date(expirationDate);
@@ -91,11 +125,20 @@ export default function InventoryTable({
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays < 0) {
-      return { text: t('inventory:expiration.expiredDays', { days: Math.abs(diffDays) }), color: 'bg-red-100 text-red-800' };
+      return { 
+        text: t('inventory:expiration.expiredDays', { days: Math.abs(diffDays) }), 
+        status: 'expired' as const 
+      };
     } else if (diffDays <= 3) {
-      return { text: t('inventory:expiration.expiresIn', { days: diffDays }), color: 'bg-yellow-100 text-yellow-800' };
+      return { 
+        text: t('inventory:expiration.expiresIn', { days: diffDays }), 
+        status: 'warning' as const 
+      };
     } else {
-      return { text: t('inventory:expiration.expiresOn', { date: expDate.toLocaleDateString() }), color: 'bg-green-100 text-green-800' };
+      return { 
+        text: t('inventory:expiration.expiresOn', { date: expDate.toLocaleDateString() }), 
+        status: 'good' as const 
+      };
     }
   };
 
@@ -104,9 +147,9 @@ export default function InventoryTable({
     return device ? device.name : t('inventory:fallbacks.unknownDevice');
   };
 
-  const getDeviceTypeColor = (deviceId: number) => {
+  const getDeviceType = (deviceId: number) => {
     const device = devices.find(d => d.id === deviceId);
-    return device?.type === 'refrigerator' ? 'bg-blue-500' : 'bg-purple-500';
+    return device?.type === 'refrigerator' ? 'refrigerator' : 'freezer';
   };
 
   return (
@@ -118,11 +161,11 @@ export default function InventoryTable({
               <h3 className="text-lg font-semibold text-slate-900">{t('inventory:title')}</h3>
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <div className={cn(deviceIndicatorVariants({ type: 'refrigerator' }))}></div>
                   <span className="text-sm text-slate-600">{t('inventory:table.legend.refrigerator')}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  <div className={cn(deviceIndicatorVariants({ type: 'freezer' }))}></div>
                   <span className="text-sm text-slate-600">{t('inventory:table.legend.freezer')}</span>
                 </div>
               </div>
@@ -155,17 +198,18 @@ export default function InventoryTable({
                   <tbody className="divide-y divide-slate-200">
                     {items.map((item) => {
                       const expirationStatus = getExpirationStatus(item.expirationDate);
+                      const deviceType = getDeviceType(item.deviceId);
                       
                       return (
                         <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-4 px-6">
                             <div className="flex items-center space-x-3">
-                              <div className={`w-2 h-2 rounded-full ${getDeviceTypeColor(item.deviceId)}`}></div>
+                              <div className={cn(deviceIndicatorVariants({ type: deviceType }))}></div>
                               <span className="font-medium text-slate-900">{item.name}</span>
                             </div>
                           </td>
                           <td className="py-4 px-6">
-                            <Badge className={getCategoryColor(item.category)}>
+                            <Badge className={cn(categoryBadgeVariants({ category: item.category as any }))}>
                               {getCategoryName(item.category)}
                             </Badge>
                           </td>
@@ -174,7 +218,7 @@ export default function InventoryTable({
                             {new Date(item.dateAdded).toLocaleDateString()}
                           </td>
                           <td className="py-4 px-6">
-                            <Badge className={expirationStatus.color}>
+                            <Badge className={cn(expirationBadgeVariants({ status: expirationStatus.status }))}>
                               {expirationStatus.text}
                             </Badge>
                           </td>
