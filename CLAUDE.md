@@ -19,6 +19,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run db:fresh` - Reset database and start development server
 - Requires `DATABASE_URL` environment variable for PostgreSQL connection
 
+### Testing
+- `npm test` - Run tests in watch mode during development
+- `npm run test:run` - Run all tests once (CI/CD)
+- `npm run test:ui` - Run tests with Vitest UI interface
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:watch` - Run tests in watch mode (alias for npm test)
+
 ### Environment Setup
 - `NODE_ENV` - Environment mode (development/production)
 - `DATABASE_URL` - PostgreSQL connection string (required)
@@ -42,8 +49,9 @@ This is a monorepo with three main directories:
 
 ### Storage Layer Architecture
 The backend uses an abstracted storage interface (`IStorage`) with:
-- Current implementation: `MemStorage` (in-memory with default data)
-- Designed for easy database integration via Drizzle ORM
+- **Production**: `DbStorage` (PostgreSQL via Drizzle ORM)
+- **Fallback**: `MemStorage` (in-memory with default data)
+- **Auto-detection**: Automatically chooses based on `DATABASE_URL` environment variable
 - All data operations go through the storage layer for consistency
 
 ### Database Schema
@@ -99,3 +107,36 @@ The application includes realistic sample data for development:
 - **Easy reset** - `npm run db:reset` clears and reloads fresh sample data
 
 Sample data includes items like ground beef, chicken breasts, frozen vegetables, leftover meals, craft beer, and more with appropriate quantities and expiration windows.
+
+## Test Infrastructure
+
+The application includes comprehensive testing infrastructure:
+- **Vitest** - Fast test runner with TypeScript and React support
+- **Testing Library** - User-centric component testing
+- **Supertest** - HTTP API testing for Express endpoints
+- **jsdom** - DOM environment for component tests
+
+### Test Structure
+- `tests/unit/` - Component and utility function tests
+- `tests/integration/` - API and database integration tests
+- `tests/setup/` - Test configuration and database utilities
+
+### Test Database
+Tests use a completely isolated PostgreSQL test database for safety:
+- **Separate database**: `cool_track_test` (isolated from development data)
+- **Automated setup**: `npm run test:db:setup` creates test database
+- **Schema sync**: `npm run db:push:test` applies schema to test database
+- **Safety checks**: Prevents running tests against production databases
+- **Environment**: Uses `.env.test` file with `TEST_DATABASE_URL`
+
+**Setup Process:**
+1. `npm run test:db:setup` - Creates isolated test database
+2. `npm run db:push:test` - Applies schema to test database
+3. `npm run test` - Runs tests with complete data isolation
+
+### Coverage
+Tests cover critical functionality:
+- API endpoints (CRUD operations for inventory, devices, settings)
+- Sample data generation logic
+- Component rendering and user interactions
+- Utility functions for date handling and formatting

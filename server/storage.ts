@@ -246,8 +246,12 @@ export class DbStorage implements IStorage {
     if (!this.db) return false;
     
     try {
-      const result = await this.db.delete(devices).where(eq(devices.id, id));
-      return result.rowCount > 0;
+      // First check if device exists
+      const existing = await this.getDevice(id);
+      if (!existing) return false;
+      
+      await this.db.delete(devices).where(eq(devices.id, id));
+      return true;
     } catch (error) {
       console.error("Error deleting device:", error);
       return false;
@@ -313,8 +317,12 @@ export class DbStorage implements IStorage {
     if (!this.db) return false;
     
     try {
-      const result = await this.db.delete(inventoryItems).where(eq(inventoryItems.id, id));
-      return result.rowCount > 0;
+      // First check if item exists
+      const existing = await this.getInventoryItem(id);
+      if (!existing) return false;
+      
+      await this.db.delete(inventoryItems).where(eq(inventoryItems.id, id));
+      return true;
     } catch (error) {
       console.error("Error deleting inventory item:", error);
       return false;
