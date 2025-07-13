@@ -20,7 +20,7 @@ import {
   type UserSession,
   type InsertUserSession
 } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, lt } from "drizzle-orm";
 
 export interface IStorage {
   // User management
@@ -40,8 +40,10 @@ export interface IStorage {
   // Session management
   createSession(session: InsertUserSession): Promise<UserSession>;
   getSession(id: string): Promise<UserSession | undefined>;
+  getUserFromSession(sessionId: string): Promise<User | null>;
   deleteSession(id: string): Promise<boolean>;
   deleteUserSessions(userId: number): Promise<number>; // Returns count of deleted sessions
+  updateUserPassword(userId: number, passwordHash: string): Promise<boolean>;
   cleanupExpiredSessions(): Promise<number>; // Returns count of cleaned up sessions
 
   // Device methods - now household-scoped
@@ -240,6 +242,23 @@ export class MemStorage implements IStorage {
     const userSessions = Array.from(this.userSessions.values()).filter(session => session.userId === userId);
     userSessions.forEach(session => this.userSessions.delete(session.id));
     return userSessions.length;
+  }
+
+  async getUserFromSession(sessionId: string): Promise<User | null> {
+    const session = await this.getSession(sessionId);
+    if (!session) return null;
+    
+    const user = await this.getUserById(session.userId);
+    return user || null;
+  }
+
+  async updateUserPassword(userId: number, passwordHash: string): Promise<boolean> {
+    const user = this.users.get(userId);
+    if (!user) return false;
+    
+    const updatedUser = { ...user, passwordHash, updatedAt: new Date() };
+    this.users.set(userId, updatedUser);
+    return true;
   }
 
   async cleanupExpiredSessions(): Promise<number> {
@@ -572,12 +591,44 @@ export class DbStorage implements IStorage {
     }
   }
 
+  async getUserFromSession(sessionId: string): Promise<User | null> {
+    if (!this.db) return null;
+    
+    try {
+      const session = await this.getSession(sessionId);
+      if (!session) return null;
+      
+      const user = await this.getUserById(session.userId);
+      return user || null;
+    } catch (error) {
+      console.error("Error getting user from session:", error);
+      return null;
+    }
+  }
+
+  async updateUserPassword(userId: number, passwordHash: string): Promise<boolean> {
+    if (!this.db) return false;
+    
+    try {
+      const result = await this.db
+        .update(users)
+        .set({ passwordHash, updatedAt: new Date() })
+        .where(eq(users.id, userId))
+        .returning({ id: users.id });
+      
+      return result.length > 0;
+    } catch (error) {
+      console.error("Error updating user password:", error);
+      return false;
+    }
+  }
+
   async cleanupExpiredSessions(): Promise<number> {
     if (!this.db) return 0;
     
     try {
       const now = new Date();
-      const result = await this.db.delete(userSessions).where(eq(userSessions.expiresAt, now)).returning({ id: userSessions.id });
+      const result = await this.db.delete(userSessions).where(lt(userSessions.expiresAt, now)).returning({ id: userSessions.id });
       return result.length;
     } catch (error) {
       console.error("Error cleaning up expired sessions:", error);

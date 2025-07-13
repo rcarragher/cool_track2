@@ -1,27 +1,45 @@
-import { describe, it, expect, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import { registerRoutes } from '@server/routes';
+import session from 'express-session';
+import { mockAuthModule, restoreAuthModule, mockUser } from '../helpers/auth-mock';
 import { clearTestDatabase, seedTestDevices, seedTestSettings, closeTestDatabase } from '../setup/test-db';
 
-// Create test app
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
+let app: express.Application;
 let server: any;
 let testDevices: any[];
 
-// Setup test server
-beforeEach(async () => {
-  server = await registerRoutes(app);
-  await clearTestDatabase();
-  testDevices = await seedTestDevices();
-  await seedTestSettings();
+beforeAll(async () => {
+  // Mock authentication before importing routes
+  mockAuthModule();
 });
 
 afterAll(async () => {
+  restoreAuthModule();
   await closeTestDatabase();
+});
+
+// Setup test server
+beforeEach(async () => {
+  // Create fresh app instance for each test
+  app = express();
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
+  
+  // Add session middleware for authentication context
+  app.use(session({
+    secret: 'test-secret',
+    resave: false,
+    saveUninitialized: false
+  }));
+
+  // Import routes after mocking auth
+  const { registerRoutes } = await import('@server/routes');
+  server = await registerRoutes(app);
+  
+  await clearTestDatabase();
+  testDevices = await seedTestDevices();
+  await seedTestSettings();
 });
 
 describe('Devices API', () => {

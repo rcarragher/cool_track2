@@ -1,9 +1,29 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
+import ConnectPgSimple from "connect-pg-simple";
+import postgres from "postgres";
 import { registerRoutes } from "./routes";
+import { registerAuthRoutes } from "./auth-routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { config } from "./config";
+import { SESSION_CONFIG } from "./auth";
 
 const app = express();
+
+// Configure session store with PostgreSQL
+const PgSession = ConnectPgSimple(session);
+const sessionStore = new PgSession({
+  conString: process.env.DATABASE_URL,
+  tableName: 'user_sessions',
+  createTableIfMissing: false // We manage this with our migrations
+});
+
+// Configure express session
+app.use(session({
+  store: sessionStore,
+  ...SESSION_CONFIG
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -38,6 +58,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Register authentication routes
+  registerAuthRoutes(app);
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

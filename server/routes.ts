@@ -9,26 +9,26 @@ import {
   updateDeviceSchema,
 } from "@shared/schema";
 import { z } from "zod";
+import { requireAuth, getCurrentHouseholdId, type AuthenticatedRequest } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Temporary: Use default household ID until authentication is implemented
-  const DEFAULT_HOUSEHOLD_ID = 1;
-
-  // Device routes
-  app.get("/api/devices", async (req, res) => {
+  // Device routes - all protected with authentication
+  app.get("/api/devices", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const devices = await storage.getDevices(DEFAULT_HOUSEHOLD_ID);
+      const householdId = getCurrentHouseholdId(req);
+      const devices = await storage.getDevices(householdId);
       res.json(devices);
     } catch (error) {
       res.status(500).json({ message: "Failed to get devices" });
     }
   });
 
-  app.post("/api/devices", async (req, res) => {
+  app.post("/api/devices", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const householdId = getCurrentHouseholdId(req);
       const deviceData = apiInsertDeviceSchema.parse(req.body);
       // Add household ID to device data
-      const deviceWithHousehold = { ...deviceData, householdId: DEFAULT_HOUSEHOLD_ID };
+      const deviceWithHousehold = { ...deviceData, householdId };
       const device = await storage.createDevice(deviceWithHousehold);
       res.json(device);
     } catch (error) {
@@ -40,11 +40,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/devices/:id", async (req, res) => {
+  app.put("/api/devices/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const householdId = getCurrentHouseholdId(req);
       const id = parseInt(req.params.id);
       const deviceData = updateDeviceSchema.parse(req.body);
-      const device = await storage.updateDevice(id, deviceData, DEFAULT_HOUSEHOLD_ID);
+      const device = await storage.updateDevice(id, deviceData, householdId);
       
       if (!device) {
         res.status(404).json({ message: "Device not found" });
@@ -60,10 +61,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/devices/:id", async (req, res) => {
+  app.delete("/api/devices/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const householdId = getCurrentHouseholdId(req);
       const id = parseInt(req.params.id);
-      const success = await storage.deleteDevice(id, DEFAULT_HOUSEHOLD_ID);
+      const success = await storage.deleteDevice(id, householdId);
       
       if (!success) {
         res.status(404).json({ message: "Device not found" });
@@ -75,21 +77,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Inventory routes
-  app.get("/api/inventory", async (req, res) => {
+  // Inventory routes - all protected with authentication
+  app.get("/api/inventory", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const items = await storage.getInventoryItems(DEFAULT_HOUSEHOLD_ID);
+      const householdId = getCurrentHouseholdId(req);
+      const items = await storage.getInventoryItems(householdId);
       res.json(items);
     } catch (error) {
       res.status(500).json({ message: "Failed to get inventory items" });
     }
   });
 
-  app.post("/api/inventory", async (req, res) => {
+  app.post("/api/inventory", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const householdId = getCurrentHouseholdId(req);
       const itemData = apiInsertInventoryItemSchema.parse(req.body);
       // Add household ID to item data
-      const itemWithHousehold = { ...itemData, householdId: DEFAULT_HOUSEHOLD_ID };
+      const itemWithHousehold = { ...itemData, householdId };
       const item = await storage.createInventoryItem(itemWithHousehold);
       res.json(item);
     } catch (error) {
@@ -101,11 +105,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/inventory/:id", async (req, res) => {
+  app.put("/api/inventory/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const householdId = getCurrentHouseholdId(req);
       const id = parseInt(req.params.id);
       const itemData = updateInventoryItemSchema.parse(req.body);
-      const item = await storage.updateInventoryItem(id, itemData, DEFAULT_HOUSEHOLD_ID);
+      const item = await storage.updateInventoryItem(id, itemData, householdId);
       
       if (!item) {
         res.status(404).json({ message: "Inventory item not found" });
@@ -121,10 +126,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/inventory/:id", async (req, res) => {
+  app.delete("/api/inventory/:id", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const householdId = getCurrentHouseholdId(req);
       const id = parseInt(req.params.id);
-      const success = await storage.deleteInventoryItem(id, DEFAULT_HOUSEHOLD_ID);
+      const success = await storage.deleteInventoryItem(id, householdId);
       
       if (!success) {
         res.status(404).json({ message: "Inventory item not found" });
@@ -136,21 +142,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Settings routes
-  app.get("/api/settings", async (req, res) => {
+  // Settings routes - all protected with authentication
+  app.get("/api/settings", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
-      const settings = await storage.getSettings(DEFAULT_HOUSEHOLD_ID);
+      const householdId = getCurrentHouseholdId(req);
+      const settings = await storage.getSettings(householdId);
       res.json(settings);
     } catch (error) {
       res.status(500).json({ message: "Failed to get settings" });
     }
   });
 
-  app.post("/api/settings", async (req, res) => {
+  app.post("/api/settings", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
+      const householdId = getCurrentHouseholdId(req);
       const settingData = apiInsertSettingsSchema.parse(req.body);
       // Add household ID to setting data
-      const settingWithHousehold = { ...settingData, householdId: DEFAULT_HOUSEHOLD_ID };
+      const settingWithHousehold = { ...settingData, householdId };
       const setting = await storage.setSetting(settingWithHousehold);
       res.json(setting);
     } catch (error) {
