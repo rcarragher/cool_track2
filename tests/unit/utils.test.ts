@@ -3,22 +3,21 @@ import { describe, it, expect } from 'vitest';
 // Utility functions for date handling and expiration checking
 function isExpired(expirationDate: string | null): boolean {
   if (!expirationDate) return false;
-  const expDate = new Date(expirationDate + 'T00:00:00'); // Add time to avoid timezone issues
+  const expDate = new Date(expirationDate + 'T00:00:00Z'); // Use UTC
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return expDate < today;
+  const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  return expDate < todayUTC;
 }
 
 function isExpiringSoon(expirationDate: string | null, warningDays: number = 3): boolean {
   if (!expirationDate) return false;
-  const expDate = new Date(expirationDate + 'T00:00:00'); // Add time to avoid timezone issues
+  const expDate = new Date(expirationDate + 'T00:00:00Z'); // Use UTC
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const warningDate = new Date();
-  warningDate.setDate(today.getDate() + warningDays);
-  warningDate.setHours(23, 59, 59, 999);
+  const todayUTC = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+  const warningDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + warningDays));
+  warningDate.setUTCHours(23, 59, 59, 999);
   
-  return expDate >= today && expDate <= warningDate;
+  return expDate >= todayUTC && expDate <= warningDate;
 }
 
 function formatDateForDisplay(dateString: string): string {
@@ -69,7 +68,7 @@ describe('Utility Functions', () => {
 
     it('should return false for today', () => {
       const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const todayStr = today.toISOString().split('T')[0];
       expect(isExpired(todayStr)).toBe(false);
     });
   });
@@ -97,7 +96,7 @@ describe('Utility Functions', () => {
 
     it('should return true for today', () => {
       const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const todayStr = today.toISOString().split('T')[0];
       expect(isExpiringSoon(todayStr, 3)).toBe(true);
     });
 
