@@ -106,19 +106,19 @@ function generateExpirationDate(category: string, today: Date): string {
 }
 
 // Determine which device based on item type and category
-function getDeviceId(category: string, itemName: string): number {
+function getDeviceId(category: string, itemName: string, deviceIds: { refrigerator: number; freezer: number }): number {
   // Frozen items go to freezer
   if (itemName.toLowerCase().includes("frozen") || 
       (category === "meat" && Math.random() > 0.3) || // 70% of meat in freezer
       (category === "prepared" && Math.random() > 0.5)) { // 50% of prepared in freezer
-    return DEVICE_IDS.freezer;
+    return deviceIds.freezer;
   }
   
   // Everything else goes to refrigerator
-  return DEVICE_IDS.refrigerator;
+  return deviceIds.refrigerator;
 }
 
-export function generateSampleData(today: Date = new Date()): InsertInventoryItem[] {
+export function generateSampleData(today: Date = new Date(), householdId: number = 1, deviceIds = DEVICE_IDS): InsertInventoryItem[] {
   const sampleData: InsertInventoryItem[] = [];
   const todayStr = format(today, "yyyy-MM-dd");
   
@@ -135,7 +135,8 @@ export function generateSampleData(today: Date = new Date()): InsertInventoryIte
         name: item.name,
         category: category as "meat" | "fruit-veg" | "prepared" | "cocktail",
         quantity: item.quantity,
-        deviceId: getDeviceId(category, item.name),
+        deviceId: getDeviceId(category, item.name, deviceIds),
+        householdId,
         dateAdded: todayStr,
         expirationDate: generateExpirationDate(category, today),
       });
@@ -148,7 +149,8 @@ export function generateSampleData(today: Date = new Date()): InsertInventoryIte
       name: "Milk",
       category: "fruit-veg" as const,
       quantity: "1 gallon",
-      deviceId: DEVICE_IDS.refrigerator,
+      deviceId: deviceIds.refrigerator,
+      householdId,
       dateAdded: todayStr,
       expirationDate: format(addDays(today, 2), "yyyy-MM-dd"),
     },
@@ -156,7 +158,8 @@ export function generateSampleData(today: Date = new Date()): InsertInventoryIte
       name: "Greek Yogurt",
       category: "fruit-veg" as const,
       quantity: "32 oz container",
-      deviceId: DEVICE_IDS.refrigerator,
+      deviceId: deviceIds.refrigerator,
+      householdId,
       dateAdded: todayStr,
       expirationDate: format(addDays(today, 1), "yyyy-MM-dd"),
     },
@@ -164,7 +167,8 @@ export function generateSampleData(today: Date = new Date()): InsertInventoryIte
       name: "Fresh Fish",
       category: "meat" as const,
       quantity: "2 fillets",
-      deviceId: DEVICE_IDS.refrigerator,
+      deviceId: deviceIds.refrigerator,
+      householdId,
       dateAdded: todayStr,
       expirationDate: format(addDays(today, 3), "yyyy-MM-dd"),
     },
@@ -176,7 +180,8 @@ export function generateSampleData(today: Date = new Date()): InsertInventoryIte
       name: "Leftover Pizza",
       category: "prepared" as const,
       quantity: "3 slices",
-      deviceId: DEVICE_IDS.refrigerator,
+      deviceId: deviceIds.refrigerator,
+      householdId,
       dateAdded: format(addDays(today, -5), "yyyy-MM-dd"),
       expirationDate: format(addDays(today, -2), "yyyy-MM-dd"), // Expired 2 days ago
     },
@@ -184,7 +189,8 @@ export function generateSampleData(today: Date = new Date()): InsertInventoryIte
       name: "Cottage Cheese",
       category: "fruit-veg" as const,
       quantity: "16 oz container",
-      deviceId: DEVICE_IDS.refrigerator,
+      deviceId: deviceIds.refrigerator,
+      householdId,
       dateAdded: format(addDays(today, -8), "yyyy-MM-dd"),
       expirationDate: format(addDays(today, -1), "yyyy-MM-dd"), // Expired yesterday
     },
@@ -192,7 +198,8 @@ export function generateSampleData(today: Date = new Date()): InsertInventoryIte
       name: "Deli Turkey",
       category: "meat" as const,
       quantity: "8 oz package",
-      deviceId: DEVICE_IDS.refrigerator,
+      deviceId: deviceIds.refrigerator,
+      householdId,
       dateAdded: format(addDays(today, -10), "yyyy-MM-dd"),
       expirationDate: format(addDays(today, -3), "yyyy-MM-dd"), // Expired 3 days ago
     },
@@ -200,7 +207,8 @@ export function generateSampleData(today: Date = new Date()): InsertInventoryIte
       name: "Fresh Herbs",
       category: "fruit-veg" as const,
       quantity: "1 bunch",
-      deviceId: DEVICE_IDS.refrigerator,
+      deviceId: deviceIds.refrigerator,
+      householdId,
       dateAdded: format(addDays(today, -6), "yyyy-MM-dd"),
       expirationDate: format(addDays(today, -1), "yyyy-MM-dd"), // Expired yesterday
     },
@@ -208,7 +216,8 @@ export function generateSampleData(today: Date = new Date()): InsertInventoryIte
       name: "Leftover Soup",
       category: "prepared" as const,
       quantity: "16 oz container",
-      deviceId: DEVICE_IDS.refrigerator,
+      deviceId: deviceIds.refrigerator,
+      householdId,
       dateAdded: format(addDays(today, -7), "yyyy-MM-dd"),
       expirationDate: format(addDays(today, -4), "yyyy-MM-dd"), // Expired 4 days ago
     },

@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { devices, inventoryItems, settings } from "@shared/schema";
+import { devices, inventoryItems, settings, households } from "@shared/schema";
 
 // Test database configuration
 const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL;
@@ -33,16 +33,33 @@ export async function clearTestDatabase() {
     await testDb.delete(inventoryItems);
     await testDb.delete(devices);
     await testDb.delete(settings);
+    // Note: We keep households for seeding functions
   } catch (error) {
     console.error("Error clearing test database:", error);
     throw error;
   }
 }
 
+export async function ensureTestHousehold() {
+  // Check if test household exists, create if not
+  const existingHouseholds = await testDb.select().from(households).limit(1);
+  
+  if (existingHouseholds.length === 0) {
+    const result = await testDb.insert(households).values({
+      name: "Test Household"
+    }).returning();
+    return result[0];
+  }
+  
+  return existingHouseholds[0];
+}
+
 export async function seedTestDevices() {
+  const household = await ensureTestHousehold();
+  
   const testDevices = [
-    { name: "Test Refrigerator", type: "refrigerator" },
-    { name: "Test Freezer", type: "freezer" },
+    { name: "Test Refrigerator", type: "refrigerator", householdId: household.id },
+    { name: "Test Freezer", type: "freezer", householdId: household.id },
   ];
 
   const insertedDevices = [];
@@ -55,9 +72,11 @@ export async function seedTestDevices() {
 }
 
 export async function seedTestSettings() {
+  const household = await ensureTestHousehold();
+  
   const testSettings = [
-    { key: "defaultItemsToShow", value: "10" },
-    { key: "expirationWarningDays", value: "3" },
+    { key: "defaultItemsToShow", value: "10", householdId: household.id },
+    { key: "expirationWarningDays", value: "3", householdId: household.id },
   ];
 
   const insertedSettings = [];

@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { devices, inventoryItems, settings } from "@shared/schema";
+import { devices, inventoryItems, settings, households } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import generateSampleData from "./sample-data";
 
@@ -21,6 +21,7 @@ async function clearDatabase() {
     await db.delete(inventoryItems);
     await db.delete(devices);
     await db.delete(settings);
+    // Note: Keep households for reference
     
     console.log("✅ Database cleared successfully");
   } catch (error) {
@@ -29,32 +30,58 @@ async function clearDatabase() {
   }
 }
 
-async function seedDevices() {
+async function ensureDefaultHousehold() {
+  console.log("🏠 Ensuring default household exists...");
+  
+  try {
+    // Check if default household exists
+    const existingHouseholds = await db.select().from(households).limit(1);
+    
+    if (existingHouseholds.length === 0) {
+      const result = await db.insert(households).values({
+        name: "Default Household"
+      }).returning();
+      console.log("✅ Created default household");
+      return result[0];
+    }
+    
+    console.log("✅ Default household already exists");
+    return existingHouseholds[0];
+  } catch (error) {
+    console.error("❌ Error ensuring default household:", error);
+    throw error;
+  }
+}
+
+async function seedDevices(householdId: number) {
   console.log("🏠 Seeding devices...");
   
   const defaultDevices = [
-    { id: 1, name: "Main Refrigerator", type: "refrigerator" },
-    { id: 2, name: "Garage Freezer", type: "freezer" },
+    { name: "Main Refrigerator", type: "refrigerator", householdId },
+    { name: "Garage Freezer", type: "freezer", householdId },
   ];
   
   try {
+    const insertedDevices = [];
     for (const device of defaultDevices) {
-      await db.insert(devices).values(device);
+      const result = await db.insert(devices).values(device).returning();
+      insertedDevices.push(result[0]);
     }
     console.log(`✅ Seeded ${defaultDevices.length} devices`);
+    return insertedDevices;
   } catch (error) {
     console.error("❌ Error seeding devices:", error);
     throw error;
   }
 }
 
-async function seedSettings() {
+async function seedSettings(householdId: number) {
   console.log("⚙️  Seeding settings...");
   
   const defaultSettings = [
-    { id: 1, key: "defaultItemsToShow", value: "25" },
-    { id: 2, key: "expirationWarningDays", value: "3" },
-    { id: 3, key: "lastSeededDate", value: new Date().toISOString().split('T')[0] },
+    { key: "defaultItemsToShow", value: "25", householdId },
+    { key: "expirationWarningDays", value: "3", householdId },
+    { key: "lastSeededDate", value: new Date().toISOString().split('T')[0], householdId },
   ];
   
   try {
@@ -68,11 +95,11 @@ async function seedSettings() {
   }
 }
 
-async function seedInventory() {
+async function seedInventory(householdId: number, deviceIds: { refrigerator: number; freezer: number }) {
   console.log("📦 Generating and seeding inventory items...");
   
   try {
-    const sampleData = generateSampleData();
+    const sampleData = generateSampleData(new Date(), householdId, deviceIds);
     
     // Insert in batches to avoid overwhelming the database
     const batchSize = 10;
@@ -148,9 +175,17 @@ async function main() {
     console.log(`📅 Using today's date: ${new Date().toLocaleDateString()}`);
     
     await clearDatabase();
-    await seedDevices();
-    await seedSettings();
-    await seedInventory();
+    const household = await ensureDefaultHousehold();
+    const devices = await seedDevices(household.id);
+    await seedSettings(household.id);
+    
+    // Create device ID mapping for sample data generation
+    const deviceIds = {
+      refrigerator: devices.find(d => d.type === 'refrigerator')?.id || devices[0].id,
+      freezer: devices.find(d => d.type === 'freezer')?.id || devices[1].id
+    };
+    
+    await seedInventory(household.id, deviceIds);
     
     console.log("🎉 Database seeding completed successfully!");
     console.log("💡 Run 'npm run dev' to start the application with sample data");
