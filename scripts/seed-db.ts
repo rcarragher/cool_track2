@@ -1,8 +1,9 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { devices, inventoryItems, settings, households } from "@shared/schema";
+import { devices, inventoryItems, settings, households, users } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import generateSampleData from "./sample-data";
+import { hashPassword } from "../server/auth";
 
 if (!process.env.DATABASE_URL) {
   console.error("❌ DATABASE_URL environment variable is required");
@@ -21,7 +22,8 @@ async function clearDatabase() {
     await db.delete(inventoryItems);
     await db.delete(devices);
     await db.delete(settings);
-    // Note: Keep households for reference
+    await db.delete(users);
+    // Note: Keep households for reference, they'll be recreated if needed
     
     console.log("✅ Database cleared successfully");
   } catch (error) {
@@ -39,7 +41,7 @@ async function ensureDefaultHousehold() {
     
     if (existingHouseholds.length === 0) {
       const result = await db.insert(households).values({
-        name: "Default Household"
+        name: "Demo Household"
       }).returning();
       console.log("✅ Created default household");
       return result[0];
@@ -49,6 +51,42 @@ async function ensureDefaultHousehold() {
     return existingHouseholds[0];
   } catch (error) {
     console.error("❌ Error ensuring default household:", error);
+    throw error;
+  }
+}
+
+async function seedDemoUser(householdId: number) {
+  console.log("👤 Creating demo user...");
+  
+  try {
+    // Check if demo user already exists
+    const existingUser = await db.select().from(users).where(eq(users.email, "user@example.com")).limit(1);
+    
+    if (existingUser.length === 0) {
+      // Create demo user with easy-to-remember credentials
+      const passwordHash = await hashPassword("demo123");
+      
+      const result = await db.insert(users).values({
+        email: "user@example.com",
+        passwordHash,
+        householdId,
+        role: "admin",
+        emailVerified: true
+      }).returning();
+      
+      console.log("✅ Created demo user:");
+      console.log("   📧 Email: user@example.com");
+      console.log("   🔑 Password: demo123");
+      console.log("   👑 Role: admin");
+      return result[0];
+    }
+    
+    console.log("✅ Demo user already exists");
+    console.log("   📧 Email: user@example.com");
+    console.log("   🔑 Password: demo123");
+    return existingUser[0];
+  } catch (error) {
+    console.error("❌ Error creating demo user:", error);
     throw error;
   }
 }
@@ -176,6 +214,7 @@ async function main() {
     
     await clearDatabase();
     const household = await ensureDefaultHousehold();
+    await seedDemoUser(household.id);
     const devices = await seedDevices(household.id);
     await seedSettings(household.id);
     
@@ -188,6 +227,11 @@ async function main() {
     await seedInventory(household.id, deviceIds);
     
     console.log("🎉 Database seeding completed successfully!");
+    console.log("");
+    console.log("🚀 Ready to demo! Use these credentials:");
+    console.log("   📧 Email: user@example.com");
+    console.log("   🔑 Password: demo123");
+    console.log("");
     console.log("💡 Run 'npm run dev' to start the application with sample data");
     
   } catch (error) {

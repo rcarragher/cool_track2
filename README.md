@@ -80,6 +80,16 @@ npm run dev
 
 Navigate to [http://localhost:3000](http://localhost:3000) to access the application.
 
+## 🎮 Demo Credentials
+
+The seeding script creates a demo user with sample data for easy testing:
+
+- **Email**: `user@example.com`
+- **Password**: `demo123`
+- **Sample Data**: ~50 inventory items across multiple categories with realistic expiration dates
+
+This demo user is automatically created when you run `npm run db:reset` or `npm run db:seed`. New users who register through the UI will start with empty households.
+
 ## 📜 Available Scripts
 
 - `npm run dev` - Start development server with live reloading

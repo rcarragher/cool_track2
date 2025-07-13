@@ -32,5 +32,16 @@
     "showing": "Showing {{start}} to {{end}} of {{total}} items",
     "itemsPerPage": "Items per page:",
     "pageOf": "Page {{current}} of {{total}}"
+  },
+  "auth": {
+    "changePassword": {
+      "title": "Change Password",
+      "subtitle": "Update your account password for security.",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password",
+      "submit": "Update Password",
+      "cancel": "Cancel"
+    }
   }
 }

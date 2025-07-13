@@ -8,6 +8,8 @@ import InventoryTable from "@/components/inventory-table";
 import AddItemModal from "@/components/add-item-modal";
 import SettingsModal from "@/components/settings-modal";
 import { HeaderMenu } from "@/components/header-menu";
+import { ChangePasswordForm } from "@/components/auth/change-password-form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Device, InventoryItem } from "@shared/schema";
 
 export default function Dashboard() {
@@ -16,6 +18,7 @@ export default function Dashboard() {
   const [displayLimit, setDisplayLimit] = useState(10);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'expiring' | 'expired'>('all');
   const [showFullList, setShowFullList] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -163,7 +166,10 @@ export default function Dashboard() {
                   {t('dashboard:backToDashboard')}
                 </Button>
               )}
-              <HeaderMenu onSettingsClick={() => setShowSettingsModal(true)} />
+              <HeaderMenu 
+                onSettingsClick={() => setShowSettingsModal(true)}
+                onChangePasswordClick={() => setShowChangePasswordModal(true)}
+              />
             </div>
           </div>
         </div>
@@ -319,6 +325,19 @@ export default function Dashboard() {
         onClose={() => setShowSettingsModal(false)}
         devices={devices}
       />
+
+      {/* Change Password Modal */}
+      <Dialog open={showChangePasswordModal} onOpenChange={setShowChangePasswordModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('auth.changePassword.title')}</DialogTitle>
+          </DialogHeader>
+          <ChangePasswordForm
+            onSuccess={() => setShowChangePasswordModal(false)}
+            onCancel={() => setShowChangePasswordModal(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,0 +1,147 @@
+
+> rest-express@1.0.0 dev
+> NODE_ENV=development tsx --watch --env-file=.env server/index.ts
+
+🗃️  Using database storage (PostgreSQL)
+12:03:15 PM [express] serving on localhost:3000 (development)
+✅ Connected to PostgreSQL database
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+12:03:17 PM [express] GET /api/auth/me 401 in 0ms :: {"error":"No session found","message":"Please lo…
+SyntaxError: Bad escaped character in JSON at position 55 (line 1 column 56)
+    at JSON.parse (<anonymous>)
+    at parse (/Users/rickcar/play/cool_track2/node_modules/body-parser/lib/types/json.js:92:19)
+    at /Users/rickcar/play/cool_track2/node_modules/body-parser/lib/read.js:128:18
+    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+    at invokeCallback (/Users/rickcar/play/cool_track2/node_modules/raw-body/index.js:238:16)
+    at done (/Users/rickcar/play/cool_track2/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/Users/rickcar/play/cool_track2/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:507:28)
+    at endReadableNT (node:internal/streams/readable:1701:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+12:03:38 PM [express] POST /api/auth/register 400 in 1ms :: {"error":"Password validation failed","me…
+12:03:51 PM [express] POST /api/auth/register 201 in 236ms :: {"user":{"id":3,"email":"test@example.c…
+12:04:08 PM [vite] hmr update /src/contexts/auth-context.tsx, /src/index.css?v=cX3rC7matoIQZKNBWIkw2, /src/components/auth/login-form.tsx, /src/components/auth/register-form.tsx, /src/components/auth/change-password-form.tsx
+12:04:08 PM [vite] hmr invalidate /src/contexts/auth-context.tsx Could not Fast Refresh ("useAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:04:08 PM [vite] hmr update /src/App.tsx?v=cX3rC7matoIQZKNBWIkw2, /src/index.css?v=cX3rC7matoIQZKNBWIkw2, /src/components/auth/protected-route.tsx, /src/components/auth/login-form.tsx, /src/components/auth/register-form.tsx, /src/components/header-menu.tsx, /src/components/auth/change-password-form.tsx
+12:04:08 PM [express] GET /api/auth/me 401 in 0ms :: {"error":"No session found","message":"Please lo…
+12:04:18 PM [express] GET /api/auth/me 401 in 0ms :: {"error":"No session found","message":"Please lo…
+12:04:45 PM [express] POST /api/auth/register 201 in 250ms :: {"user":{"id":4,"email":"bob@example.co…
+12:04:45 PM [express] GET /api/inventory 200 in 8ms :: []
+12:04:45 PM [express] GET /api/devices 200 in 13ms :: []
+12:04:45 PM [express] GET /api/settings 200 in 13ms :: []
+12:05:20 PM [express] POST /api/auth/logout 200 in 3ms :: {"message":"Logout successful"}
+12:05:20 PM [express] GET /api/auth/me 401 in 0ms :: {"error":"No session found","message":"Please lo…
+Registration error: ZodError: [
+  {
+    "code": "too_small",
+    "minimum": 1,
+    "type": "string",
+    "inclusive": true,
+    "exact": false,
+    "message": "Household name is required",
+    "path": [
+      "householdName"
+    ]
+  }
+]
+    at get error (file:///Users/rickcar/play/cool_track2/node_modules/zod/lib/index.mjs:587:31)
+    at ZodObject.parse (file:///Users/rickcar/play/cool_track2/node_modules/zod/lib/index.mjs:663:22)
+    at <anonymous> (/Users/rickcar/play/cool_track2/server/auth-routes.ts:63:71)
+    at Layer.handle [as handle_request] (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/layer.js:95:5)
+    at next (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/layer.js:95:5)
+    at /Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:284:15
+    at router.process_params (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:280:10)
+    at <anonymous> (/Users/rickcar/play/cool_track2/server/index.ts:57:3)
+    at Layer.handle [as handle_request] (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:328:13)
+    at /Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:280:10)
+    at urlencodedParser (/Users/rickcar/play/cool_track2/node_modules/body-parser/lib/types/urlencoded.js:85:7)
+    at Layer.handle [as handle_request] (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:328:13)
+    at /Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:286:9
+    at router.process_params (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:346:12)
+    at next (/Users/rickcar/play/cool_track2/node_modules/express/lib/router/index.js:280:10)
+    at /Users/rickcar/play/cool_track2/node_modules/body-parser/lib/read.js:137:5
+    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)
+    at invokeCallback (/Users/rickcar/play/cool_track2/node_modules/raw-body/index.js:238:16)
+    at done (/Users/rickcar/play/cool_track2/node_modules/raw-body/index.js:227:7)
+    at IncomingMessage.onEnd (/Users/rickcar/play/cool_track2/node_modules/raw-body/index.js:287:7)
+    at IncomingMessage.emit (node:events:507:28)
+    at endReadableNT (node:internal/streams/readable:1701:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  issues: [
+    {
+      code: 'too_small',
+      minimum: 1,
+      type: 'string',
+      inclusive: true,
+      exact: false,
+      message: 'Household name is required',
+      path: [Array]
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)],
+  errors: [
+    {
+      code: 'too_small',
+      minimum: 1,
+      type: 'string',
+      inclusive: true,
+      exact: false,
+      message: 'Household name is required',
+      path: [Array]
+    }
+  ]
+}
+12:05:49 PM [express] POST /api/auth/register 400 in 4ms :: {"error":"Validation error","message":"In…
+12:07:51 PM [vite] hmr update /src/contexts/auth-context.tsx, /src/index.css?v=cX3rC7matoIQZKNBWIkw2, /src/components/auth/login-form.tsx, /src/components/auth/register-form.tsx, /src/components/auth/change-password-form.tsx
+12:07:51 PM [vite] hmr invalidate /src/contexts/auth-context.tsx Could not Fast Refresh ("useAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:07:51 PM [vite] hmr update /src/App.tsx?v=cX3rC7matoIQZKNBWIkw2, /src/index.css?v=cX3rC7matoIQZKNBWIkw2, /src/components/auth/protected-route.tsx, /src/components/auth/login-form.tsx, /src/components/auth/register-form.tsx, /src/components/header-menu.tsx, /src/components/auth/change-password-form.tsx
+12:07:51 PM [express] GET /api/auth/me 401 in 1ms :: {"error":"No session found","message":"Please lo…
+Restarting 'server/index.ts'
+🗃️  Using database storage (PostgreSQL)
+12:08:17 PM [express] serving on localhost:3000 (development)
+✅ Connected to PostgreSQL database
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+12:08:19 PM [express] GET /api/auth/me 401 in 2ms :: {"error":"No session found","message":"Please lo…
+12:08:27 PM [vite] hmr update /src/components/auth/login-form.tsx, /src/index.css?v=Zb9mdpZPVyRlddoGCrUXc, /src/components/auth/register-form.tsx, /src/contexts/auth-context.tsx, /src/components/auth/change-password-form.tsx
+12:08:27 PM [vite] hmr invalidate /src/contexts/auth-context.tsx Could not Fast Refresh ("useAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+12:08:27 PM [vite] hmr update /src/App.tsx?v=Zb9mdpZPVyRlddoGCrUXc, /src/index.css?v=Zb9mdpZPVyRlddoGCrUXc, /src/components/auth/protected-route.tsx, /src/components/auth/login-form.tsx, /src/components/auth/register-form.tsx, /src/components/header-menu.tsx, /src/components/auth/change-password-form.tsx
+12:08:27 PM [express] GET /api/auth/me 401 in 0ms :: {"error":"No session found","message":"Please lo…
+12:08:58 PM [express] POST /api/auth/register 201 in 245ms :: {"user":{"id":5,"email":"sue@example.co…
+12:08:58 PM [express] GET /api/settings 200 in 6ms :: [{"id":7,"key":"defaultItemsToShow","value":"25…
+12:08:58 PM [express] GET /api/devices 200 in 15ms :: [{"id":5,"name":"Main Refrigerator","type":"ref…
+12:08:58 PM [express] GET /api/inventory 200 in 15ms :: [{"id":139,"name":"Salmon Fillets","category"…
+Restarting 'server/index.ts'
+🗃️  Using database storage (PostgreSQL)
+12:10:10 PM [express] serving on localhost:3000 (development)
+✅ Connected to PostgreSQL database
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+12:10:11 PM [express] GET /api/auth/me 200 in 16ms :: {"user":{"id":5,"email":"sue@example.com","hous…
+12:10:11 PM [express] GET /api/devices 304 in 6ms :: [{"id":5,"name":"Main Refrigerator","type":"refr…
+12:10:11 PM [express] GET /api/settings 304 in 14ms :: [{"id":7,"key":"defaultItemsToShow","value":"2…
+12:10:11 PM [express] GET /api/inventory 304 in 14ms :: [{"id":139,"name":"Salmon Fillets","category"…
+12:10:51 PM [express] POST /api/auth/logout 200 in 3ms :: {"message":"Logout successful"}
+12:10:51 PM [express] GET /api/auth/me 401 in 1ms :: {"error":"No session found","message":"Please lo…
+12:11:14 PM [express] POST /api/auth/register 201 in 237ms :: {"user":{"id":6,"email":"ryan@example.c…
+12:11:14 PM [express] GET /api/devices 200 in 6ms :: []
+12:11:14 PM [express] GET /api/settings 200 in 9ms :: []
+12:11:14 PM [express] GET /api/inventory 200 in 10ms :: []
+12:11:20 PM [express] POST /api/auth/logout 200 in 3ms :: {"message":"Logout successful"}
+12:11:20 PM [express] GET /api/auth/me 401 in 1ms :: {"error":"No session found","message":"Please lo…
+12:11:43 PM [express] POST /api/auth/login 200 in 234ms :: {"user":{"id":2,"email":"user@example.com"…
+12:11:43 PM [express] GET /api/devices 200 in 7ms :: [{"id":5,"name":"Main Refrigerator","type":"refr…
+12:11:43 PM [express] GET /api/settings 200 in 7ms :: [{"id":7,"key":"defaultItemsToShow","value":"25…
+12:11:43 PM [express] GET /api/inventory 200 in 7ms :: [{"id":139,"name":"Salmon Fillets","category":…

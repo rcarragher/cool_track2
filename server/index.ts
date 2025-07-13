@@ -14,8 +14,8 @@ const app = express();
 const PgSession = ConnectPgSimple(session);
 const sessionStore = new PgSession({
   conString: process.env.DATABASE_URL,
-  tableName: 'user_sessions',
-  createTableIfMissing: false // We manage this with our migrations
+  tableName: 'session', // Use default table name for connect-pg-simple
+  createTableIfMissing: true // Let connect-pg-simple manage its own table
 });
 
 // Configure express session

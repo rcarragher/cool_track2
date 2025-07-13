@@ -25,8 +25,8 @@ declare module 'express-session' {
 const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  householdName: z.string().min(1, 'Household name is required').optional(),
-  name: z.string().min(1, 'Name is required').optional()
+  householdName: z.string().optional(),
+  name: z.string().optional()
 });
 
 const loginSchema = z.object({
@@ -84,14 +84,12 @@ export function registerAuthRoutes(app: Express) {
       // Hash password
       const passwordHash = await hashPassword(password);
 
-      // Create household if provided, otherwise use default
-      let householdId = 1; // Default household
-      if (householdName) {
-        const household = await storage.createHousehold({
-          name: householdName
-        });
-        householdId = household.id;
-      }
+      // Always create a new household for each user
+      const defaultHouseholdName = householdName || `${email}'s Household`;
+      const household = await storage.createHousehold({
+        name: defaultHouseholdName
+      });
+      const householdId = household.id;
 
       // Create user
       const userData = {
