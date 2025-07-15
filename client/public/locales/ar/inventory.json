@@ -16,12 +16,17 @@
     "expiresOn": "تنتهي صلاحيته {{date}}"
   },
   "toast": {
+    "itemAdded": {
+      "title": "تم إضافة العنصر",
+      "description": "تم إضافة عنصر المخزون بنجاح."
+    },
     "itemDeleted": {
       "title": "تم حذف العنصر",
       "description": "تم حذف عنصر المخزون بنجاح."
     },
     "error": {
       "title": "خطأ",
+      "addFailed": "فشل في إضافة العنصر. حاول مرة أخرى.",
       "deleteFailed": "فشل في حذف العنصر. حاول مرة أخرى."
     },
     "comingSoon": {

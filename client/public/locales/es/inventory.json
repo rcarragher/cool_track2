@@ -16,12 +16,17 @@
     "expiresOn": "Vence {{date}}"
   },
   "toast": {
+    "itemAdded": {
+      "title": "Artículo agregado",
+      "description": "El artículo del inventario ha sido agregado exitosamente."
+    },
     "itemDeleted": {
       "title": "Artículo eliminado",
       "description": "El artículo del inventario ha sido eliminado exitosamente."
     },
     "error": {
       "title": "Error",
+      "addFailed": "Error al agregar el artículo. Inténtalo de nuevo.",
       "deleteFailed": "Error al eliminar el artículo. Inténtalo de nuevo."
     },
     "comingSoon": {

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import { X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const formInputVariants = cva("", {
 });
 
 export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalProps) {
+  const { t } = useTranslation(['inventory', 'common']);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -72,16 +74,16 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inventory'] });
       toast({
-        title: "Item added",
-        description: "The inventory item has been added successfully.",
+        title: t('toast.itemAdded.title'),
+        description: t('toast.itemAdded.description'),
       });
       form.reset();
       onClose();
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to add the item. Please try again.",
+        title: t('toast.error.title'),
+        description: t('toast.error.addFailed'),
         variant: "destructive",
       });
     },
@@ -104,16 +106,16 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add New Item</DialogTitle>
+          <DialogTitle>{t('addModal.title')}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Item Name *</Label>
+            <Label htmlFor="name">{t('common:labels.name')} *</Label>
             <Input
               id="name"
               {...form.register("name")}
-              placeholder="Enter item name"
+              placeholder={t('common:placeholders.enterItemName')}
               className={cn(formInputVariants({ error: !!form.formState.errors.name }))}
             />
             {form.formState.errors.name && (
@@ -122,19 +124,19 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="category">Category *</Label>
+            <Label htmlFor="category">{t('common:labels.category')} *</Label>
             <Select 
               value={form.watch("category") || ""} 
               onValueChange={(value) => form.setValue("category", value)}
             >
               <SelectTrigger className={cn(formInputVariants({ error: !!form.formState.errors.category }))}>
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder={t('common:placeholders.selectCategory')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="meat">Meat</SelectItem>
-                <SelectItem value="cocktail">Cocktail Supplies</SelectItem>
-                <SelectItem value="fruit-veg">Fruit/Veg</SelectItem>
-                <SelectItem value="prepared">Prepared Meals</SelectItem>
+                <SelectItem value="meat">{t('common:categories.meat')}</SelectItem>
+                <SelectItem value="cocktail">{t('common:categories.cocktail')}</SelectItem>
+                <SelectItem value="fruit-veg">{t('common:categories.fruitVeg')}</SelectItem>
+                <SelectItem value="prepared">{t('common:categories.prepared')}</SelectItem>
               </SelectContent>
             </Select>
             {form.formState.errors.category && (
@@ -143,7 +145,7 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="quantity">Quantity *</Label>
+            <Label htmlFor="quantity">{t('common:labels.quantity')} *</Label>
             <Input
               id="quantity"
               {...form.register("quantity")}
@@ -156,13 +158,13 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="deviceId">Device *</Label>
+            <Label htmlFor="deviceId">{t('common:labels.device')} *</Label>
             <Select 
               value={form.watch("deviceId")?.toString() || ""} 
               onValueChange={(value) => form.setValue("deviceId", parseInt(value))}
             >
               <SelectTrigger className={cn(formInputVariants({ error: !!form.formState.errors.deviceId }))}>
-                <SelectValue placeholder="Select device" />
+                <SelectValue placeholder={t('common:placeholders.selectDevice')} />
               </SelectTrigger>
               <SelectContent>
                 {devices.map(device => (
@@ -180,7 +182,7 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
 
           
           <div className="space-y-2">
-            <Label htmlFor="dateAdded">Date Added</Label>
+            <Label htmlFor="dateAdded">{t('common:labels.dateAdded')}</Label>
             <Input
               id="dateAdded"
               type="date"
@@ -189,13 +191,13 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="expirationDate">Expiration Date</Label>
+            <Label htmlFor="expirationDate">{t('common:labels.expirationDate')}</Label>
             <Input
               id="expirationDate"
               type="date"
               {...form.register("expirationDate")}
             />
-            <p className="text-xs text-slate-500">Optional - leave blank for items that don't expire</p>
+            <p className="text-xs text-slate-500">{t('addModal.helpText')}</p>
           </div>
           
           <div className="flex items-center space-x-3 pt-4">
@@ -204,7 +206,7 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
               className="flex-1"
               disabled={createItemMutation.isPending}
             >
-              {createItemMutation.isPending ? "Adding..." : "Add Item"}
+              {createItemMutation.isPending ? t('common:status.loading') : t('common:buttons.add') + ' Item'}
             </Button>
             <Button 
               type="button" 
@@ -212,7 +214,7 @@ export default function AddItemModal({ isOpen, onClose, devices }: AddItemModalP
               className="flex-1"
               onClick={handleClose}
             >
-              Cancel
+              {t('common:buttons.cancel')}
             </Button>
           </div>
         </form>
