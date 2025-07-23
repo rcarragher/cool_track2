@@ -81,8 +81,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/inventory", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
       const householdId = getCurrentHouseholdId(req);
-      const items = await storage.getInventoryItems(householdId);
-      res.json(items);
+      
+      // Parse pagination parameters
+      const page = req.query.page ? parseInt(req.query.page as string) : undefined;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const search = req.query.search as string;
+      const deviceId = req.query.deviceId ? parseInt(req.query.deviceId as string) : undefined;
+      
+      // Check if pagination parameters are provided
+      if (page !== undefined || limit !== undefined || search || deviceId !== undefined) {
+        // Use paginated endpoint
+        const result = await storage.getInventoryItemsPaginated(householdId, {
+          page,
+          limit,
+          search,
+          deviceId
+        });
+        res.json(result);
+      } else {
+        // Use original endpoint for backward compatibility
+        const items = await storage.getInventoryItems(householdId);
+        res.json(items);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to get inventory items" });
     }

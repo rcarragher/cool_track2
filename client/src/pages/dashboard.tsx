@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Snowflake, ArrowLeft } from "lucide-react";
@@ -12,6 +12,18 @@ import { ChangePasswordForm } from "@/components/auth/change-password-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Device, InventoryItem } from "@shared/schema";
 
+interface PaginatedInventoryResponse {
+  items: InventoryItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
+
 export default function Dashboard() {
   const { t } = useTranslation(['dashboard', 'common']);
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,12 +36,41 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [selectedDevice, setSelectedDevice] = useState<number | null>(null);
+  
+  // Pagination state
+  const [dashboardPage, setDashboardPage] = useState(1);
+  const [allLoadedItems, setAllLoadedItems] = useState<InventoryItem[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const ITEMS_PER_PAGE = 30;
 
   const { data: devices = [], isLoading: devicesLoading } = useQuery<Device[]>({
     queryKey: ['/api/devices'],
   });
 
-  const { data: inventoryItems = [], isLoading: inventoryLoading } = useQuery<InventoryItem[]>({
+  // Query for dashboard items (paginated)
+  const { data: dashboardInventoryData, isLoading: inventoryLoading } = useQuery<PaginatedInventoryResponse>({
+    queryKey: ['/api/inventory', { page: dashboardPage, limit: ITEMS_PER_PAGE, search: searchQuery, deviceId: selectedDevice }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append('page', dashboardPage.toString());
+      params.append('limit', ITEMS_PER_PAGE.toString());
+      if (searchQuery) {
+        params.append('search', searchQuery);
+      }
+      if (selectedDevice) {
+        params.append('deviceId', selectedDevice.toString());
+      }
+      
+      const response = await fetch(`/api/inventory?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch inventory');
+      }
+      return response.json();
+    },
+  });
+
+  // Query for all items (used for stats calculation)
+  const { data: allInventoryItems = [] } = useQuery<InventoryItem[]>({
     queryKey: ['/api/inventory'],
   });
 
@@ -44,42 +85,59 @@ export default function Dashboard() {
     const today = new Date();
     const threeDaysFromNow = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000);
     
-    const totalItems = inventoryItems.length;
+    const totalItems = allInventoryItems.length;
     
-    const expiringSoon = inventoryItems.filter(item => {
+    const expiringSoon = allInventoryItems.filter(item => {
       if (!item.expirationDate) return false;
       const expDate = new Date(item.expirationDate);
       return expDate >= today && expDate <= threeDaysFromNow;
     }).length;
     
-    const expired = inventoryItems.filter(item => {
+    const expired = allInventoryItems.filter(item => {
       if (!item.expirationDate) return false;
       const expDate = new Date(item.expirationDate);
       return expDate < today;
     }).length;
 
     return { totalItems, expiringSoon, expired };
-  }, [inventoryItems]);
+  }, [allInventoryItems]);
 
-  // Filter items based on search, filter type, and device
-  const filteredItems = useMemo(() => {
-    let filtered = inventoryItems;
+  // Query for full list view (paginated)
+  const { data: fullListData, isLoading: fullListLoading } = useQuery<PaginatedInventoryResponse>({
+    queryKey: ['/api/inventory', { 
+      page: currentPage, 
+      limit: itemsPerPage, 
+      search: searchQuery,
+      deviceId: selectedDevice,
+      filterType 
+    }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append('page', currentPage.toString());
+      params.append('limit', itemsPerPage.toString());
+      if (searchQuery) {
+        params.append('search', searchQuery);
+      }
+      if (selectedDevice) {
+        params.append('deviceId', selectedDevice.toString());
+      }
+      
+      const response = await fetch(`/api/inventory?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch inventory');
+      }
+      return response.json();
+    },
+    enabled: showFullList,
+  });
 
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(query) ||
-        item.category.toLowerCase().includes(query)
-      );
-    }
+  // Filter items for full list view (server-side filtering handles most cases)
+  const getFilteredFullListItems = useMemo(() => {
+    if (!fullListData) return [];
+    
+    let filtered = fullListData.items;
 
-    // Filter by device
-    if (selectedDevice !== null) {
-      filtered = filtered.filter(item => item.deviceId === selectedDevice);
-    }
-
-    // Filter by type
+    // Apply client-side filtering for expiration status (not handled server-side)
     if (filterType === 'expiring') {
       const today = new Date();
       const threeDaysFromNow = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000);
@@ -98,15 +156,50 @@ export default function Dashboard() {
     }
 
     return filtered;
-  }, [inventoryItems, searchQuery, filterType, selectedDevice]);
+  }, [fullListData, filterType]);
 
-  const displayedItems = displayLimit === -1 ? filteredItems : filteredItems.slice(0, displayLimit);
+  // Accumulate items for dashboard view
+  const accumulatedItems = useMemo(() => {
+    if (!dashboardInventoryData) return [];
+    
+    // Reset accumulated items when search or device filter changes
+    const key = `${searchQuery}-${selectedDevice}`;
+    if (allLoadedItems.length === 0 || dashboardPage === 1) {
+      return dashboardInventoryData.items;
+    }
+    
+    // Add new items from current page
+    const existingIds = new Set(allLoadedItems.map(item => item.id));
+    const newItems = dashboardInventoryData.items.filter(item => !existingIds.has(item.id));
+    return [...allLoadedItems, ...newItems];
+  }, [dashboardInventoryData, allLoadedItems, searchQuery, selectedDevice, dashboardPage]);
 
-  // Pagination for full list view
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-  const paginatedItems = showFullList 
-    ? filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-    : displayedItems;
+  // Update accumulated items when dashboard data changes
+  useEffect(() => {
+    if (dashboardInventoryData?.items) {
+      setAllLoadedItems(accumulatedItems);
+    }
+  }, [accumulatedItems, dashboardInventoryData]);
+
+  // Reset pagination when search or device filter changes
+  useEffect(() => {
+    setDashboardPage(1);
+    setAllLoadedItems([]);
+  }, [searchQuery, selectedDevice]);
+
+  // Load more handler
+  const handleLoadMore = () => {
+    if (dashboardInventoryData?.pagination.hasNext) {
+      setDashboardPage(prev => prev + 1);
+    }
+  };
+
+  // Get the appropriate items and pagination for current view
+  const displayedItems = showFullList ? getFilteredFullListItems : (displayLimit === -1 ? accumulatedItems : accumulatedItems.slice(0, displayLimit));
+  const totalPages = showFullList ? (fullListData?.pagination.totalPages || 1) : 1;
+  const totalItems = showFullList ? (fullListData?.pagination.total || 0) : (dashboardInventoryData?.pagination.total || 0);
+  const hasMore = showFullList ? false : (dashboardInventoryData?.pagination.hasNext || false);
+  const paginatedItems = displayedItems;
 
   const handleCardClick = (type: 'total' | 'expiring' | 'expired' | 'add') => {
     switch (type) {
@@ -198,8 +291,8 @@ export default function Dashboard() {
                   <span className="text-sm text-slate-600">
                     {t('dashboard:pagination.showing', { 
                       start: ((currentPage - 1) * itemsPerPage) + 1, 
-                      end: Math.min(currentPage * itemsPerPage, filteredItems.length), 
-                      total: filteredItems.length 
+                      end: Math.min(currentPage * itemsPerPage, totalItems), 
+                      total: totalItems 
                     })}
                   </span>
                   <div className="flex items-center space-x-2">
@@ -244,7 +337,7 @@ export default function Dashboard() {
               {/* Inventory Table */}
               <InventoryTable
                 items={paginatedItems}
-                totalItems={filteredItems.length}
+                totalItems={totalItems}
                 displayLimit={-1}
                 devices={devices}
                 searchQuery={searchQuery}
@@ -301,13 +394,16 @@ export default function Dashboard() {
             {/* Inventory Table */}
             <InventoryTable
               items={displayedItems}
-              totalItems={filteredItems.length}
+              totalItems={totalItems}
               displayLimit={displayLimit}
               devices={devices}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               selectedDevice={selectedDevice}
               onDeviceFilterChange={setSelectedDevice}
+              hasMore={hasMore}
+              isLoading={inventoryLoading}
+              onLoadMore={handleLoadMore}
             />
           </>
         )}

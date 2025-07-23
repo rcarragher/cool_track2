@@ -22,6 +22,9 @@ interface InventoryTableProps {
   onSearchChange?: (query: string) => void;
   selectedDevice?: number | null;
   onDeviceFilterChange?: (deviceId: number | null) => void;
+  hasMore?: boolean;
+  isLoading?: boolean;
+  onLoadMore?: () => void;
 }
 
 // Define variants using class-variance-authority
@@ -54,18 +57,6 @@ const expirationBadgeVariants = cva("", {
   },
 });
 
-const deviceIndicatorVariants = cva("w-2 h-2 rounded-full", {
-  variants: {
-    type: {
-      refrigerator: "bg-blue-500",
-      freezer: "bg-purple-500",
-    },
-  },
-  defaultVariants: {
-    type: "refrigerator",
-  },
-});
-
 export default function InventoryTable({
   items,
   totalItems,
@@ -75,6 +66,9 @@ export default function InventoryTable({
   onSearchChange,
   selectedDevice = null,
   onDeviceFilterChange,
+  hasMore = false,
+  isLoading = false,
+  onLoadMore,
 }: InventoryTableProps) {
   const { t } = useTranslation(['inventory', 'common']);
   const { toast } = useToast();
@@ -157,11 +151,6 @@ export default function InventoryTable({
     return device ? device.name : t('inventory:fallbacks.unknownDevice');
   };
 
-  const getDeviceType = (deviceId: number) => {
-    const device = devices.find(d => d.id === deviceId);
-    return device?.type === 'refrigerator' ? 'refrigerator' : 'freezer';
-  };
-
   return (
     <section>
       <Card>
@@ -169,16 +158,6 @@ export default function InventoryTable({
           <div className="p-6 border-b border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-slate-900">{t('inventory:title')}</h3>
-              <div className="flex items-center space-x-3">
-                <div className="flex items-center space-x-2">
-                  <div className={cn(deviceIndicatorVariants({ type: 'refrigerator' }))}></div>
-                  <span className="text-sm text-slate-600">{t('inventory:table.legend.refrigerator')}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className={cn(deviceIndicatorVariants({ type: 'freezer' }))}></div>
-                  <span className="text-sm text-slate-600">{t('inventory:table.legend.freezer')}</span>
-                </div>
-              </div>
             </div>
             
             {/* Search and Filter Controls */}
@@ -248,13 +227,11 @@ export default function InventoryTable({
                   <tbody className="divide-y divide-slate-200">
                     {items.map((item) => {
                       const expirationStatus = getExpirationStatus(item.expirationDate);
-                      const deviceType = getDeviceType(item.deviceId);
                       
                       return (
                         <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-4 px-6">
                             <div className="flex items-center space-x-3">
-                              <div className={cn(deviceIndicatorVariants({ type: deviceType }))}></div>
                               <span className="font-medium text-slate-900">{item.name}</span>
                             </div>
                           </td>
@@ -312,20 +289,22 @@ export default function InventoryTable({
                   <div className="text-sm text-slate-600">
 {t('inventory:table.footer.showing', { count: items.length, total: totalItems })}
                   </div>
-                  {displayLimit !== -1 && items.length >= displayLimit && (
+                  {hasMore && onLoadMore && (
                     <div className="flex items-center space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // TODO: Implement load more functionality
-                          toast({
-                            title: t('inventory:toast.comingSoon.loadMore'),
-                            description: t('inventory:toast.comingSoon.loadMoreDescription'),
-                          });
-                        }}
+                        onClick={onLoadMore}
+                        disabled={isLoading}
                       >
-{t('common:buttons.loadMore')}
+                        {isLoading ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mr-2"></div>
+                            {t('common:buttons.loading')}
+                          </>
+                        ) : (
+                          t('common:buttons.loadMore')
+                        )}
                       </Button>
                     </div>
                   )}

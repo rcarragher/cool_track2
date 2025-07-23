@@ -20,7 +20,26 @@ import {
   type UserSession,
   type InsertUserSession
 } from "@shared/schema";
-import { eq, and, lt } from "drizzle-orm";
+import { eq, and, lt, ilike, or, count, desc } from "drizzle-orm";
+
+export interface PaginationOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  deviceId?: number;
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}
 
 export interface IStorage {
   // User management
@@ -55,6 +74,7 @@ export interface IStorage {
 
   // Inventory methods - now household-scoped
   getInventoryItems(householdId: number): Promise<InventoryItem[]>;
+  getInventoryItemsPaginated(householdId: number, options?: PaginationOptions): Promise<PaginatedResult<InventoryItem>>;
   getInventoryItem(id: number, householdId: number): Promise<InventoryItem | undefined>;
   createInventoryItem(item: InsertInventoryItem): Promise<InventoryItem>;
   updateInventoryItem(id: number, item: Partial<InsertInventoryItem>, householdId: number): Promise<InventoryItem | undefined>;
@@ -304,6 +324,49 @@ export class MemStorage implements IStorage {
   // Inventory methods - now household-scoped
   async getInventoryItems(householdId: number): Promise<InventoryItem[]> {
     return Array.from(this.inventoryItems.values()).filter(item => item.householdId === householdId);
+  }
+
+  async getInventoryItemsPaginated(householdId: number, options: PaginationOptions = {}): Promise<PaginatedResult<InventoryItem>> {
+    let filtered = Array.from(this.inventoryItems.values()).filter(item => item.householdId === householdId);
+    
+    // Apply search filter
+    if (options.search) {
+      const searchLower = options.search.toLowerCase();
+      filtered = filtered.filter(item => 
+        item.name.toLowerCase().includes(searchLower) ||
+        item.category.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Apply device filter
+    if (options.deviceId !== undefined) {
+      filtered = filtered.filter(item => item.deviceId === options.deviceId);
+    }
+    
+    // Sort by dateAdded descending (newest first)
+    filtered.sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime());
+    
+    const total = filtered.length;
+    const page = options.page || 1;
+    const limit = options.limit || total; // Default to all items for backward compatibility
+    const totalPages = limit > 0 ? Math.ceil(total / limit) : 1;
+    
+    // Apply pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedItems = limit > 0 ? filtered.slice(startIndex, endIndex) : filtered;
+    
+    return {
+      items: paginatedItems,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
+    };
   }
 
   async getInventoryItem(id: number, householdId: number): Promise<InventoryItem | undefined> {
@@ -722,6 +785,95 @@ export class DbStorage implements IStorage {
     } catch (error) {
       console.error("Error fetching inventory items:", error);
       return [];
+    }
+  }
+
+  async getInventoryItemsPaginated(householdId: number, options: PaginationOptions = {}): Promise<PaginatedResult<InventoryItem>> {
+    if (!this.db) {
+      console.warn("Database not available, returning empty result");
+      return {
+        items: [],
+        pagination: {
+          page: 1,
+          limit: 0,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false
+        }
+      };
+    }
+    
+    try {
+      // Build base query conditions
+      const conditions = [eq(inventoryItems.householdId, householdId)];
+      
+      // Add search conditions
+      if (options.search) {
+        const searchTerm = `%${options.search}%`;
+        conditions.push(
+          or(
+            ilike(inventoryItems.name, searchTerm),
+            ilike(inventoryItems.category, searchTerm)
+          )!
+        );
+      }
+      
+      // Add device filter
+      if (options.deviceId !== undefined) {
+        conditions.push(eq(inventoryItems.deviceId, options.deviceId));
+      }
+      
+      const whereClause = conditions.length > 1 ? and(...conditions) : conditions[0];
+      
+      // Get total count
+      const [{ count: total }] = await this.db
+        .select({ count: count() })
+        .from(inventoryItems)
+        .where(whereClause);
+      
+      const page = options.page || 1;
+      const limit = options.limit || total; // Default to all items for backward compatibility
+      const totalPages = limit > 0 ? Math.ceil(total / limit) : 1;
+      
+      // Get paginated items
+      let query = this.db
+        .select()
+        .from(inventoryItems)
+        .where(whereClause)
+        .orderBy(desc(inventoryItems.dateAdded)); // Sort by dateAdded descending (newest first)
+      
+      // Apply pagination only if limit is specified
+      if (limit > 0) {
+        query = query.limit(limit).offset((page - 1) * limit);
+      }
+      
+      const items = await query;
+      
+      return {
+        items,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      };
+    } catch (error) {
+      console.error("Error fetching paginated inventory items:", error);
+      return {
+        items: [],
+        pagination: {
+          page: 1,
+          limit: 0,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false
+        }
+      };
     }
   }
 

@@ -134,6 +134,163 @@ describe('Inventory API', () => {
     expect(response.body).toHaveLength(0);
   });
 
+  describe('Pagination', () => {
+    beforeEach(async () => {
+      // Create multiple test items for pagination testing
+      const testItems = [
+        { name: 'Apple', category: 'fruit-veg', quantity: '5 pieces', deviceId: testDevices[0].id, dateAdded: '2025-07-10' },
+        { name: 'Banana', category: 'fruit-veg', quantity: '6 pieces', deviceId: testDevices[0].id, dateAdded: '2025-07-11' },
+        { name: 'Chicken Breast', category: 'meat', quantity: '1 lb', deviceId: testDevices[1].id, dateAdded: '2025-07-12' },
+        { name: 'Cocktail Mix', category: 'cocktail', quantity: '1 bottle', deviceId: testDevices[0].id, dateAdded: '2025-07-13' },
+        { name: 'Leftovers', category: 'prepared', quantity: '1 container', deviceId: testDevices[0].id, dateAdded: '2025-07-14' },
+      ];
+
+      for (const item of testItems) {
+        await request(app)
+          .post('/api/inventory')
+          .send(item);
+      }
+    });
+
+    it('should return paginated results when limit is specified', async () => {
+      const response = await request(app)
+        .get('/api/inventory?page=1&limit=2')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('items');
+      expect(response.body).toHaveProperty('pagination');
+      expect(response.body.items).toHaveLength(2);
+      expect(response.body.pagination).toMatchObject({
+        page: 1,
+        limit: 2,
+        total: 5,
+        totalPages: 3,
+        hasNext: true,
+        hasPrev: false
+      });
+    });
+
+    it('should return second page correctly', async () => {
+      const response = await request(app)
+        .get('/api/inventory?page=2&limit=2')
+        .expect(200);
+
+      expect(response.body.items).toHaveLength(2);
+      expect(response.body.pagination).toMatchObject({
+        page: 2,
+        limit: 2,
+        total: 5,
+        totalPages: 3,
+        hasNext: true,
+        hasPrev: true
+      });
+    });
+
+    it('should return last page correctly', async () => {
+      const response = await request(app)
+        .get('/api/inventory?page=3&limit=2')
+        .expect(200);
+
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.pagination).toMatchObject({
+        page: 3,
+        limit: 2,
+        total: 5,
+        totalPages: 3,
+        hasNext: false,
+        hasPrev: true
+      });
+    });
+
+    it('should maintain backward compatibility without pagination params', async () => {
+      const response = await request(app)
+        .get('/api/inventory')
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body).toHaveLength(5);
+      expect(response.body[0]).toHaveProperty('name');
+      expect(response.body[0]).not.toHaveProperty('pagination');
+    });
+
+    it('should filter by search term', async () => {
+      const response = await request(app)
+        .get('/api/inventory?search=apple')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('items');
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].name).toBe('Apple');
+      expect(response.body.pagination.total).toBe(1);
+    });
+
+    it('should filter by category in search', async () => {
+      const response = await request(app)
+        .get('/api/inventory?search=fruit')
+        .expect(200);
+
+      expect(response.body.items).toHaveLength(2);
+      expect(response.body.items.every((item: any) => item.category === 'fruit-veg')).toBe(true);
+    });
+
+    it('should filter by device ID', async () => {
+      const response = await request(app)
+        .get(`/api/inventory?deviceId=${testDevices[1].id}`)
+        .expect(200);
+
+      expect(response.body.items).toHaveLength(1);
+      expect(response.body.items[0].name).toBe('Chicken Breast');
+      expect(response.body.pagination.total).toBe(1);
+    });
+
+    it('should combine search and device filtering', async () => {
+      const response = await request(app)
+        .get(`/api/inventory?search=fruit&deviceId=${testDevices[0].id}`)
+        .expect(200);
+
+      expect(response.body.items).toHaveLength(2);
+      expect(response.body.items.every((item: any) => 
+        item.category === 'fruit-veg' && item.deviceId === testDevices[0].id
+      )).toBe(true);
+    });
+
+    it('should return items sorted by dateAdded descending', async () => {
+      const response = await request(app)
+        .get('/api/inventory?limit=5')
+        .expect(200);
+
+      const dates = response.body.items.map((item: any) => new Date(item.dateAdded));
+      for (let i = 0; i < dates.length - 1; i++) {
+        expect(dates[i].getTime()).toBeGreaterThanOrEqual(dates[i + 1].getTime());
+      }
+    });
+
+    it('should handle page beyond total pages', async () => {
+      const response = await request(app)
+        .get('/api/inventory?page=10&limit=2')
+        .expect(200);
+
+      expect(response.body.items).toHaveLength(0);
+      expect(response.body.pagination).toMatchObject({
+        page: 10,
+        limit: 2,
+        total: 5,
+        totalPages: 3,
+        hasNext: false,
+        hasPrev: true
+      });
+    });
+
+    it('should handle zero limit gracefully', async () => {
+      const response = await request(app)
+        .get('/api/inventory?limit=0')
+        .expect(200);
+
+      expect(response.body.items).toHaveLength(5); // Should return all items
+      expect(response.body.pagination.limit).toBe(5); // Should be set to total when limit is 0
+    });
+  });
+
   it('should create a new inventory item', async () => {
     const newItem = {
       name: 'Test Apple',
